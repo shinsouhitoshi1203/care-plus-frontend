@@ -1,5 +1,11 @@
-import { View } from "react-native";
+import { useRouter } from "expo-router";
+import { Text, View } from "react-native";
 
 export default function Index() {
-  return <View></View>;
+  const router = useRouter();
+  return (
+    <View>
+      <Text className="text-2xl font-bold">Welcome to Care Plus!</Text>
+    </View>
+  );
 }
