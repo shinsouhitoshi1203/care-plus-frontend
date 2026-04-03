@@ -47,6 +47,8 @@ Tham khảo: https://docs.expo.dev/router/basics/notation/
 └── ...
 ```
 
+Khi tao trang moi, nếu có phần dùng chung thì tạo folder trong thư mục cùng cấp với /app, nếu không có phần dùng chung thì tạo folder trong thư mục của feature đó.
+
 # Đặt tên file và folder
 
 - Nên đặt tên file và folder theo feature
@@ -60,6 +62,12 @@ Chú ý chính tả và chữ hoa thường. GitHub không sửa được tên f
 
 - Tên object, function, variable: camelCase
 - Tên component và class: PascalCase
+
+## Lưu ý: Đặt tên component trong file không cần thêm hậu tố .component, .view, .screen,...
+
+- Không cần thêm hậu tố Component, View, Screen,... vào tên file component.
+  Ví dụ: UserProfile.tsx thay vì UserProfileComponent.tsx / UserProfileView.tsx / UserProfileScreen.tsx. :thumsdown:
+- Đặt tên hàm của component theo tên file, ví dụ: Header.tsx => function HeaderLayout() { ... }. Dễ nhận biết khi render component trong JSX, ví dụ: <HeaderLayout /> thay vì <HeaderComponent /> hoặc <HeaderView />.
 
 # Chia nhánh:
 
