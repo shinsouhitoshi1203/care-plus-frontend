@@ -3,7 +3,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { Image, View } from "react-native";
 import MenuBarRoundedButton from "./RoundedButton";
 
-function HeaderLayout() {
+function ProtectedHeaderLayout() {
   return (
     <View className="w-full py-2 px-4 flex-row items-center justify-between gap-2">
       <MenuBarRoundedButton />
@@ -12,4 +12,4 @@ function HeaderLayout() {
     </View>
   );
 }
-export default HeaderLayout;
+export default ProtectedHeaderLayout;

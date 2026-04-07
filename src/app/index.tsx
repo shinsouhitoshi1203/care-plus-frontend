@@ -1,10 +1,14 @@
-import { Text, View } from "react-native";
+import useAuth from "@/hooks/useAuth";
+import { Redirect } from "expo-router";
 
 function EntryPage() {
-  return (
-    <View>
-      <Text>Welcome to the Entry Page</Text>
-    </View>
-  );
+  const isAuthenticated = useAuth();
+  console.log("isAuthenticated:", isAuthenticated);
+  if (isAuthenticated) {
+    console.log("User is authenticated, redirecting to /protected/home");
+    return <Redirect href="/protected/home" />;
+  }
+
+  return <Redirect href="/welcome" />;
 }
 export default EntryPage;

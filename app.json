@@ -5,7 +5,6 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "owner": "ayatollah72",
-
     "icon": "./src/assets/images/icon.png",
     "scheme": "careplusfrontend",
     "userInterfaceStyle": "automatic",
@@ -21,7 +20,8 @@
         "monochromeImage": "./src/assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ayatollah72.careplus"
     },
     "web": {
       "bundler": "metro",
@@ -41,11 +41,24 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2c9fa031-fabf-437a-8733-551851d9e03d"
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 import "@/global.css";
-import HeaderLayout from "@/layouts/Header";
+import ProtectedHeaderLayout from "@/layouts/ProtectedHeader";
 import tabBarOption from "@/layouts/TabNavigator/tabBarOption";
 import { Tabs } from "expo-router";
 
@@ -7,7 +7,7 @@ export default function RootLayout() {
   return (
     // <View className="flex-1 ">
     <>
-      <HeaderLayout />
+      <ProtectedHeaderLayout />
       <Tabs screenOptions={tabBarOption}>
         <Tabs.Screen name="home" options={{ title: "Home" }} />
         <Tabs.Screen name="reminder" options={{ title: "Reminder" }} />
