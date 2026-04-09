@@ -59,17 +59,18 @@ function LoginPage() {
           message: "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.",
         });
       } else {
+        console.log("Unexpected error during login:", error.stack);
         setError("root", { type: "manual", message: "Đã có lỗi xảy ra. Vui lòng thử lại sau." });
       }
     },
-    mutationKey: ["auth"],
+    mutationKey: ["user"],
     onSuccess: (data) => {
       const { tokens, user } = data;
       TokenService.setTokens(tokens);
-      secureStore.set("userInfo", JSON.stringify(user));
-      queryClient.invalidateQueries(["user", "auth"] as any);
+      secureStore.set("user", JSON.stringify(user));
+      // queryClient.invalidateQueries(["user"] as any);
       // queryClient.setQueryData(["user"], user);
-      // queryClient.setQueryData(["auth"], { isAuthenticated: true });
+      queryClient.setQueryData(["user"], user);
     },
   });
 
@@ -77,7 +78,7 @@ function LoginPage() {
     async (loginData: LoginRequest) => {
       try {
         await mutateAsync(loginData);
-        router.push("/protected/home");
+        router.replace("/protected/home");
       } catch (error) {
         // Error handling is already done in onError, so we can leave this empty or log the error if needed
         console.log("Unhandled error in handleLogin:", error);

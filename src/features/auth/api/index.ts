@@ -19,6 +19,12 @@ const AuthAPI = {
       throw error;
     }
   },
+
+  async check() {
+    const data = (await apiClient.get("/user/me")).data.data;
+
+    return data;
+  },
 };
 
 export default AuthAPI;

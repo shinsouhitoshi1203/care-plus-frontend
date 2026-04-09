@@ -11,16 +11,17 @@ function LogoutButton() {
   const queryClient = useQueryClient();
   const setIsLoading = useZustandStore((state) => state.setLoading);
   const { mutate } = useMutation({
-    mutationKey: ["auth", "user"],
+    mutationKey: ["user"],
     mutationFn: async () => {
       await AuthAPI.logout();
       await TokenService.clearTokens();
     },
-    onSuccess: () => {
+    onSettled: () => {
       setIsLoading(false);
-      queryClient.invalidateQueries({ queryKey: ["user", "auth"] });
+      queryClient.removeQueries({ queryKey: ["user"] });
       // Navigate to login page or perform any other necessary actions after logout
-      router.push("/");
+      console.log("User logged out successfully");
+      router.replace("/(auth)/welcome");
     },
     onMutate: () => {
       setIsLoading(true);
