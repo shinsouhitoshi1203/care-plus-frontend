@@ -1,10 +1,24 @@
-import { ActivityIndicator, View } from "react-native";
-
-function Loading() {
-  return (
-    <View className="flex-1 justify-center items-center bg-[rgba(255,255,255,0.8)]">
-      <ActivityIndicator size="large" color="#ff00ff" className="flex-1 justify-center items-center" />
-    </View>
-  );
+import useZustandStore from "@/stores/zustand";
+import { useEffect, useState } from "react";
+import LoadingRaw from "./LoadingRaw";
+function useLoadingZustand() {
+  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    const unsubscribe = useZustandStore.subscribe(
+      (state) => state.loading,
+      (loading) => {
+        setIsLoading(loading);
+      }
+    );
+    return () => {
+      unsubscribe();
+    };
+  });
+  return isLoading;
 }
-export default Loading;
+// Loading component using loading state from zustand
+function LoadingWithZustand() {
+  const loading = useLoadingZustand();
+  return <LoadingRaw variant="dark" show={loading} />;
+}
+export default LoadingWithZustand;

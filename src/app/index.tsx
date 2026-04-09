@@ -5,7 +5,7 @@ function EntryPage() {
   const isAuthenticated = useAuth();
   console.log("isAuthenticated:", isAuthenticated);
   if (isAuthenticated) {
-    console.log("User is authenticated, redirecting to /protected/home");
+    // console.log("User is authenticated, redirecting to /protected/home");
     return <Redirect href="/protected/home" />;
   }
 

@@ -1,4 +1,4 @@
-import Loading from "@/components/Loading";
+import LoadingRaw from "@/components/Loading/LoadingRaw";
 import { stackOptions } from "@/config/routing";
 import useAuth from "@/hooks/useAuth";
 import tanstackClient from "@/stores/tanstack";
@@ -11,7 +11,7 @@ export default function RootLayout() {
   let isLogin = useAuth();
   return (
     <QueryClientProvider client={tanstackClient}>
-      <Suspense fallback={<Loading />}>
+      <Suspense fallback={<LoadingRaw />}>
         <SafeAreaView className="flex-1">
           <Stack screenOptions={stackOptions}>
             <Stack.Screen name="index" />

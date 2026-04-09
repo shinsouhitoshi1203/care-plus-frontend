@@ -1,4 +1,4 @@
-import Loading from "@/components/Loading";
+import Loading from "@/components/Loading/LoadingRaw";
 import useWait from "@/hooks/useWait";
 import { ComponentType } from "react";
 

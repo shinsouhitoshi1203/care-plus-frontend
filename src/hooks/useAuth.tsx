@@ -1,30 +1,22 @@
-import checkAuth from "@/features/auth/api/checkAuth";
-import useAuthInfo from "@/features/auth/hook/useAuthInfo";
-import { useEffect, useState } from "react";
+import TokenService from "@/features/auth/token";
+import tanstackClient from "@/stores/tanstack";
+import { useQuery } from "@tanstack/react-query";
 
-function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const authInfo = useAuthInfo();
+function useAuth(): boolean {
+  const { data: isAuthenticated } = useQuery<boolean>(
+    {
+      queryKey: ["auth"],
+      queryFn: async () => {
+        // Implement your logic to check if the user is authenticated
+        // For example, you can check if a valid access token exists in secure storage
+        const { accessToken, refreshToken } = await TokenService.getTokens();
+        return !!accessToken && !!refreshToken; // Return true if both tokens exist, false otherwise
+      },
+    },
+    tanstackClient
+  );
 
-  useEffect(() => {
-    // Check authentication status on component mount
-    let isDoubleFetch = false;
-
-    const checkAuthStatus = async () => {
-      const authStatus = await checkAuth();
-      setIsAuthenticated(authStatus);
-    };
-    if (isDoubleFetch) return;
-    // Code starts here
-    if (!authInfo.accessToken) checkAuthStatus();
-
-    // Code ends here
-    return () => {
-      isDoubleFetch = true;
-    };
-  }, [isAuthenticated, authInfo]);
-
-  return isAuthenticated;
+  return isAuthenticated || false; // Return false if isAuthenticated is undefined (e.g., during initial loading)
 }
 
 export default useAuth;

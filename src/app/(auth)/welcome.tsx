@@ -3,6 +3,7 @@ import LinkButton from "@/features/welcome/components/LinkButton";
 import LoginButton from "@/features/welcome/components/LoginButton";
 import NewButton from "@/features/welcome/components/NewButton";
 import { ResponsiveProvider } from "@/features/welcome/contexts/Responsive";
+import withWaitFallback from "@/hocs/withWaitFallback";
 import { Image, Text, View } from "react-native";
 
 function WelcomePage() {
@@ -11,7 +12,7 @@ function WelcomePage() {
       <View className="flex-1 bg-white px-4 py-4">
         <View className="flex-1 items-center justify-center">
           <View className="mb-7 items-center justify-center" style={{ borderRadius: 18 }}>
-            <Image source={img.welcome} resizeMode="contain" style={{ width: 200, height: 200, borderRadius: 18 }} />
+            <Image source={img.welcome} resizeMode="contain" style={{ width: 150, height: 150, borderRadius: 18 }} />
           </View>
 
           <Text className="mb-4 text-center font-bold text-[#1F2937]" style={{ fontSize: 36 }}>
@@ -32,4 +33,4 @@ function WelcomePage() {
   );
 }
 
-export default WelcomePage;
+export default withWaitFallback(WelcomePage);

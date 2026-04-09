@@ -10,7 +10,7 @@ function LinkButton() {
   return (
     <View className="mb-3 w-full">
       <Button
-        title="Liên kết máy của gia đình"
+        title="Liên kết máy"
         type="outline"
         icon={showMemberLinkIcon ? <QrCodeIcon size={34} color="#2C5EDB" strokeWidth={2.2} /> : undefined}
         iconContainerStyle={showMemberLinkIcon ? { marginRight: 14 } : undefined}
@@ -20,8 +20,9 @@ function LinkButton() {
           borderColor: "#C2D0EF",
           borderWidth: 2,
           borderRadius: 22,
-          justifyContent: showMemberLinkIcon ? "flex-start" : "center",
+          justifyContent: "center",
           paddingHorizontal: 18,
+          gap: 10,
         }}
         titleStyle={{
           color: "#2C5EDB",

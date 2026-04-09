@@ -1,4 +1,10 @@
+import LogoutButton from "@/features/user/component/buttons/Logout";
+
 function User() {
-  return <></>;
+  return (
+    <>
+      <LogoutButton />
+    </>
+  );
 }
 export default User;
