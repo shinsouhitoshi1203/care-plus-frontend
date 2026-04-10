@@ -31,4 +31,37 @@ apiClient.interceptors.request.use(
   }
 );
 
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes("/auth/refresh-token")
+    ) {
+      originalRequest._retry = true;
+      try {
+        // Attempt to refresh tokens
+        const { refreshToken } = await TokenService.getTokens();
+        const response = await axios.post(`${env.baseAPI}/auth/refresh-token`, { refreshToken });
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+        await TokenService.setTokens({ accessToken, refreshToken: newRefreshToken });
+        // Update the original request with the new access token and retry it
+        originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        await TokenService.clearTokens();
+        // Optionally, you can redirect to the login page here
+        // window.location.href = "/login";
+        return Promise.reject(refreshError);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default apiClient;

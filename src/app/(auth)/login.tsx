@@ -5,7 +5,6 @@ import AuthAPI from "@/features/auth/api";
 import { type LoginRequest, LoginRequestSchema } from "@/features/auth/schema/Login";
 import TokenService from "@/features/auth/token";
 import withWaitFallback from "@/hocs/withWaitFallback";
-import secureStore from "@/stores/secureStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -64,27 +63,26 @@ function LoginPage() {
       }
     },
     mutationKey: ["user"],
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       const { tokens, user } = data;
-      TokenService.setTokens(tokens);
-      secureStore.set("user", JSON.stringify(user));
-      // queryClient.invalidateQueries(["user"] as any);
-      // queryClient.setQueryData(["user"], user);
       queryClient.setQueryData(["user"], user);
+      await TokenService.setTokens(tokens);
+      // await secureStore.set("user", JSON.stringify(user));
+      router.replace("/protected/home");
     },
+    onSettled: () => {},
   });
 
   const handleLogin = useCallback(
     async (loginData: LoginRequest) => {
       try {
         await mutateAsync(loginData);
-        router.replace("/protected/home");
       } catch (error) {
         // Error handling is already done in onError, so we can leave this empty or log the error if needed
         console.log("Unhandled error in handleLogin:", error);
       }
     },
-    [mutateAsync, router]
+    [mutateAsync]
   );
 
   return (

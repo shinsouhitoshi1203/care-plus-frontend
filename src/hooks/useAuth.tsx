@@ -1,18 +1,29 @@
 import AuthAPI from "@/features/auth/api";
-import { useQuery } from "@tanstack/react-query";
+import TokenService from "@/features/auth/token";
+import { useIsFetching, useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 function useAuth() {
+  const isFetching = useIsFetching({ queryKey: ["user"] });
   const { data: user, isPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      // Implement your logic to check if the user is authenticated
-      // For example, you can check if a valid access token exists in secure storage
-      // const { accessToken, refreshToken } = await TokenService.getTokens();
-      // return !!accessToken && !!refreshToken; // Return true if both tokens exist, false otherwise
+      const { accessToken } = await TokenService.getTokens();
+      if (!accessToken) {
+        return null;
+      }
+
       return await AuthAPI.check();
     },
+    retry: false,
   });
-  console.log("userID", user?.id !== undefined);
+
+  useEffect(() => {
+    // Check if tanstack is fetching
+    if (isFetching) {
+      console.log("Fetching user data...", isFetching);
+    }
+  }, [isFetching]);
   return {
     isAuthenticated: user?.id !== undefined,
     user,

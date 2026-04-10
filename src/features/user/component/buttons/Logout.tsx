@@ -19,6 +19,7 @@ function LogoutButton() {
     onSettled: () => {
       setIsLoading(false);
       queryClient.removeQueries({ queryKey: ["user"] });
+
       // Navigate to login page or perform any other necessary actions after logout
       console.log("User logged out successfully");
       router.replace("/(auth)/welcome");

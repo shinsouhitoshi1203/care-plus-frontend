@@ -1,15 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
+import { TANSTACK_QUERY_CONFIG } from "./config";
 
-const tanstackClient = new QueryClient({
-  // Not finished yet. Still in playground mode. More options will be added soon and it will be moved to a separate file.
-  // defaultOptions: {
-  //   queries: {
-  //     gcTime: TANSTACK_QUERY_CACHE_TIME,
-  //     staleTime: TANSTACK_QUERY_CACHE_TIME,
-  //     retry: 1,
-  //     retryDelay: 1000,
-  //   },
-  // },
-});
+const tanstackClient = new QueryClient(TANSTACK_QUERY_CONFIG);
 
 export default tanstackClient;
