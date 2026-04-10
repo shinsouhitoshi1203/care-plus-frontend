@@ -45,6 +45,7 @@ function ControlledInput({
   ...props
 }: ControlledInputProps) {
   const [dataVisible, setDataVisible] = useState(false);
+  const title = props.required ? `${props.label} *` : props.label;
   return (
     <Controller
       control={control}
@@ -95,6 +96,8 @@ function ControlledInput({
               renderErrorMessage={false}
               // other props passed from parent component
               {...props}
+              // Modified props
+              label={title}
             />
             <View>{error && <Text style={{ color: "red" }}>{error.message}</Text>}</View>
           </View>
