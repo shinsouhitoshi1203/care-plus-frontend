@@ -49,7 +49,7 @@ const useZustandStore = create<ZustandStoreProps & ZustandStoreMethods>()(
         }),
 
       openDialog(dialogData: Omit<DialogState, "isOpen">) {
-        console.log("Opening dialog with data:", dialogData);
+        // console.log("Opening dialog with data:", dialogData);
         set((state) => {
           state.behavior.dialog.isOpen = true;
           state.behavior.dialog.title = dialogData.title;

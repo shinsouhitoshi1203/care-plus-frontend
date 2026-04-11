@@ -32,4 +32,33 @@ export const styles = StyleSheet.create({
   rightIconContainer: {
     marginLeft: 8,
   },
+
+  linkContainerRight: {
+    alignSelf: "flex-end",
+    marginTop: 2,
+    marginBottom: 22,
+  },
+  link: {
+    color: "#2C5EDB",
+    fontSize: 21,
+    fontWeight: "700",
+  },
+
+  bottomSection: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 28,
+    gap: 6,
+  },
+  bottomHint: {
+    color: "#74839A",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  bottomAction: {
+    color: "#2C5EDB",
+    fontSize: 16,
+    fontWeight: "700",
+  },
 });
