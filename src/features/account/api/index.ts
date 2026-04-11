@@ -4,7 +4,7 @@ import { type OTP, type RegisterRequest } from "../schema";
 export const AccountAPI = {
   async register(registerData: RegisterRequest) {
     try {
-      const response = apiClient.post("/auth/register", registerData);
+      const response = await apiClient.post("/auth/register", registerData);
       return response;
     } catch (error) {
       console.error("Error during registration:", error);
@@ -13,7 +13,7 @@ export const AccountAPI = {
   },
   async verifyOTP(payload: OTP) {
     try {
-      const response = apiClient.post("/auth/verify-email", payload);
+      const response = await apiClient.post("/auth/verify-email", payload);
       return response;
     } catch (error) {
       console.error("Error during OTP verification:", error);
@@ -22,10 +22,19 @@ export const AccountAPI = {
   },
   async resendOTP(payload: Omit<OTP, "otp">) {
     try {
-      const response = apiClient.post("/auth/resend-verify", payload);
+      const response = await apiClient.post("/auth/resend-verify", payload);
       return response;
     } catch (error) {
       console.error("Error during OTP resend:", error);
+      throw error;
+    }
+  },
+
+  async forgotPassword(payload: Omit<OTP, "otp">) {
+    try {
+      await apiClient.post("/auth/forgot-password", payload);
+    } catch (error) {
+      console.error("Error during forgot password:", error);
       throw error;
     }
   },

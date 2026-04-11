@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { Lock, Mail } from "lucide-react-native";
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, Text, View } from "react-native";
 const fieldLists = [
   {
     name: "identifier",
@@ -51,7 +51,7 @@ function LoginPage() {
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (loginData: LoginRequest) => await AuthAPI.login(loginData),
     onError: (error) => {
-      if (error instanceof AxiosError && error.status === 401) {
+      if (error instanceof AxiosError && error.response?.status === 401) {
         setError("root", { type: "manual", message: "Sai tên đăng nhập hoặc mật khẩu" });
       } else if (error instanceof AxiosError && error.code === "ERR_NETWORK") {
         setError("root", {
@@ -102,10 +102,7 @@ function LoginPage() {
             {errors.root && <Text style={{ color: "red", fontSize: 14 }}>{errors.root?.message}</Text>}
           </View>
 
-          <Pressable
-            onPress={() => Alert.alert("Thông báo", "Tính năng quên mật khẩu đang được phát triển")}
-            style={styles.linkContainerRight}
-          >
+          <Pressable onPress={() => router.navigate("/(auth)/forgot-password")} style={styles.linkContainerRight}>
             <Text style={styles.link}>Quên mật khẩu?</Text>
           </Pressable>
 

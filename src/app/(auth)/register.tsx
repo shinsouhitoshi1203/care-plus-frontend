@@ -72,7 +72,7 @@ function RegisterPage() {
     },
     onError: (error) => {
       // console.log("Registration error:", error);
-      if (error instanceof AxiosError && error.status === 401) {
+      if (error instanceof AxiosError && error.response?.status === 401) {
         setError("root", { type: "manual", message: "Sai tên đăng nhập hoặc mật khẩu" });
       } else if (error instanceof AxiosError && error.code === "ERR_NETWORK") {
         setError("root", {
@@ -91,7 +91,7 @@ function RegisterPage() {
     },
     mutationKey: ["user"],
     onSuccess: async (data) => {
-      router.replace("/(auth)/otp");
+      router.replace("/(auth)/verify-new-account");
     },
   });
   const handleRegister = useCallback(

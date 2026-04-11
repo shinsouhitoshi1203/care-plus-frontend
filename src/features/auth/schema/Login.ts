@@ -1,9 +1,12 @@
 import * as z from "zod";
 
-export interface LoginRequest {
+interface LoginRequestRaw {
   identifier: string;
+  email: string;
   password: string;
 }
+export type LoginRequest = Omit<LoginRequestRaw, "email">;
+export type ForgotPasswordRequest = Omit<LoginRequestRaw, "identifier"> & { otp: string };
 
 export const LoginRequestSchema = z
   .object({

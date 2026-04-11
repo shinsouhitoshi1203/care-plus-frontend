@@ -11,4 +11,6 @@ export const UserSchema = z.object({
 });
 
 export const RegisterRequestSchema = UserSchema.strict();
+export const ForgotRequestSchema = UserSchema.pick({ email: true }).strict();
 export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;
+export type ForgotRequest = z.infer<typeof ForgotRequestSchema>;
