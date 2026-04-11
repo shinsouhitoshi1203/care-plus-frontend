@@ -90,8 +90,13 @@ function RegisterPage() {
       }
     },
     mutationKey: ["user"],
-    onSuccess: async (data) => {
-      router.replace("/(auth)/otp");
+    onSuccess: async (_, variables) => {
+      router.replace({
+        pathname: "/(auth)/otp",
+        params: {
+          email: variables.email,
+        },
+      });
     },
   });
   const handleRegister = useCallback(
