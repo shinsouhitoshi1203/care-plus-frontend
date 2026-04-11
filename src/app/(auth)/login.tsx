@@ -2,10 +2,12 @@ import FullSizeButton from "@/components/buttons/FullSize";
 import ControlledInput from "@/components/input/ControlledInput";
 import { styles } from "@/components/input/style";
 import LoadingDialog from "@/components/Loading/LoadingDialog";
+import { AccountAPI } from "@/features/account/api";
 import AuthAPI from "@/features/auth/api";
 import { type LoginRequest, LoginRequestSchema } from "@/features/auth/schema/Login";
 import TokenService from "@/features/auth/token";
 import withWaitFallback from "@/hocs/withWaitFallback";
+import secureStore from "@/stores/secureStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -50,9 +52,31 @@ function LoginPage() {
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (loginData: LoginRequest) => await AuthAPI.login(loginData),
-    onError: (error) => {
-      if (error instanceof AxiosError && error.status === 401) {
+    onError: async (error, loginData) => {
+      if (error instanceof AxiosError && error.response?.status === 401) {
         setError("root", { type: "manual", message: "Sai tên đăng nhập hoặc mật khẩu" });
+      } else if (error instanceof AxiosError && error.response?.status === 403) {
+        // Get email address and resend OTP
+        const { identifier } = loginData;
+        try {
+          const email = await AccountAPI.resendOTPByLogin(identifier);
+          await secureStore.set("otp.email", email);
+          router.replace({
+            pathname: "/(auth)/otp",
+            params: {
+              showNeedVerifyInOTPScreen: 1,
+              email: email,
+            },
+          });
+        } catch (error) {
+          console.log(error);
+          setError("root", { type: "manual", message: "Tài khoản đã xác thực hoặc không tồn tại." });
+        }
+      } else if (error instanceof AxiosError && error.response?.status === 500) {
+        setError("root", {
+          type: "manual",
+          message: "Đã có lỗi xảy ra trên máy chủ. Vui lòng thử lại sau.",
+        });
       } else if (error instanceof AxiosError && error.code === "ERR_NETWORK") {
         setError("root", {
           type: "manual",
@@ -69,6 +93,7 @@ function LoginPage() {
       queryClient.setQueryData(["user"], user);
       await TokenService.setTokens(tokens);
       // await secureStore.set("user", JSON.stringify(user));
+      if (router.canDismiss()) router.dismissAll();
       router.replace("/protected/home");
     },
     onSettled: () => {},

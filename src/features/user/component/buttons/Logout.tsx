@@ -22,6 +22,7 @@ function LogoutButton() {
 
       // Navigate to login page or perform any other necessary actions after logout
       console.log("User logged out successfully");
+      if (router.canDismiss()) router.dismissAll();
       router.replace("/(auth)/welcome");
     },
     onMutate: () => {

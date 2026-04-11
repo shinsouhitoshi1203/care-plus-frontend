@@ -1,6 +1,6 @@
 import { Button } from "@rneui/themed";
 import { useRouter } from "expo-router";
-import { ArrowRight, CheckCircle2, Home, ShieldCheck, Sparkles } from "lucide-react-native";
+import { ArrowRight, CheckCircle2, Home, Sparkles } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { ScrollView, Text, View } from "react-native";
 
@@ -11,11 +11,6 @@ type NextStep = {
 };
 
 const nextSteps: NextStep[] = [
-  {
-    icon: ShieldCheck,
-    title: "Đăng nhập để đồng bộ dữ liệu",
-    description: "Sử dụng email hoặc số điện thoại đã đăng ký để vào tài khoản Care+.",
-  },
   {
     icon: Sparkles,
     title: "Hoàn thiện hồ sơ cá nhân",
@@ -30,7 +25,10 @@ const nextSteps: NextStep[] = [
 
 function FinishPage() {
   const router = useRouter();
-
+  const beginHandler = () => {
+    if (router.canDismiss()) router.dismissAll();
+    router.replace("/protected/home");
+  };
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
       <View className="flex-1 px-2 pb-4 pt-4">
@@ -61,7 +59,7 @@ function FinishPage() {
               </View>
 
               <View className="flex-1">
-                <Text className="mt-1 text-sm text-slate-500">Hãy hoàn tất vài thao tác nhỏ để bắt đầu</Text>
+                <Text className="mt-1 text-sm text-slate-500">Hãy hoàn tất vài thao tác dưới đây để bắt đầu</Text>
               </View>
             </View>
 
@@ -88,12 +86,12 @@ function FinishPage() {
           <View className="mt-6 w-full gap-3">
             <View className="w-full">
               <Button
-                title="Đăng nhập ngay"
-                onPress={() => router.replace("/(auth)/login")}
-                icon={<ArrowRight color="#fff" size={18} />}
+                title="Bắt đầu"
+                onPress={beginHandler}
+                icon={<ArrowRight color="#fff" size={36} />}
                 iconRight
                 radius={16}
-                buttonStyle={{ minHeight: 56, borderRadius: 16, backgroundColor: "#2C5EDB" }}
+                buttonStyle={{ minHeight: 56, borderRadius: 16, backgroundColor: "#2C5EDB", gap: 12 }}
                 titleStyle={{ color: "#FFFFFF", fontSize: 18, fontWeight: "700" }}
               />
             </View>
