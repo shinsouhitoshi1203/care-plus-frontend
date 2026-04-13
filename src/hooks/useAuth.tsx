@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 function useAuth() {
   const isFetching = useIsFetching({ queryKey: ["user"] });
-  const { data: user, isPending } = useQuery({
+  const { data: isAuthenticated, isPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const { accessToken } = await TokenService.getTokens();
@@ -14,6 +14,11 @@ function useAuth() {
       }
 
       return await AuthAPI.check();
+    },
+    select: (user) => {
+      const checkID = user?.id;
+      const checkActive = user?.is_active;
+      return !!checkID && checkActive;
     },
     retry: false,
   });
@@ -25,8 +30,7 @@ function useAuth() {
     }
   }, [isFetching]);
   return {
-    isAuthenticated: user?.id !== undefined,
-    user,
+    isAuthenticated,
     isPending,
   }; // Return false if isAuthenticated is undefined (e.g., during initial loading)
 }

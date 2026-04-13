@@ -39,4 +39,15 @@ export const AccountAPI = {
       throw error;
     }
   },
+
+  // Account CRUD
+  async getAccount() {
+    try {
+      const data = (await apiClient.get("/user/me")).data.data;
+      return data;
+    } catch (error) {
+      console.error("Error fetching account:", error);
+      throw error;
+    }
+  },
 };
