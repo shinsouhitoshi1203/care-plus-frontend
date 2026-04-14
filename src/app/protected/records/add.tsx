@@ -21,7 +21,10 @@ import { Text, View } from "react-native";
 const memberID = "b27dd5b7-a0e6-4d90-9b21-595af766f005";
 const familyID = "ec833f94-21eb-42e8-b510-84a325b2fe53";
 
-export default function RecordDashboardPage() {
+export default function AddRecordPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   useSubPageTitle("Thêm hồ sơ sức khỏe");
 
   const methods = useForm({
@@ -48,8 +51,6 @@ export default function RecordDashboardPage() {
     setValue("unit", metric?.unit);
   }, [watchType, setValue]);
 
-  const queryClient = useQueryClient();
-  const router = useRouter();
   const setLoading = useZustandStore((state) => state.setLoading);
   const { mutate } = useMutation({
     mutationKey: ["health-records"],
@@ -96,7 +97,6 @@ export default function RecordDashboardPage() {
     },
     [mutate]
   );
-
   return (
     <>
       <View className="flex-1 gap-4">

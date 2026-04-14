@@ -93,12 +93,7 @@ class CRecordAPI {
     }
   }
 
-  async getHealthRecords({
-    memberID,
-    familyID,
-    type,
-    recorded_at,
-  }: Pick<HealthRecordProps, "memberID" | "familyID" | "type" | "recorded_at">) {
+  async getHealthRecords({ memberID, familyID, type, recorded_at }: Record<string, string>) {
     try {
       const response = await apiClient.get(`${this.makeBaseURL({ memberID, familyID })}`, {
         params: {
@@ -106,7 +101,8 @@ class CRecordAPI {
           date: recorded_at,
         },
       });
-      return response.data;
+      console.log("Fetched health records:", response.data);
+      return response.data.data.records;
     } catch (error) {
       console.error("Error fetching health records:", error);
       throw error;

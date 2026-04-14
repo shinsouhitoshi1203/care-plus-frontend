@@ -39,3 +39,10 @@ export const bloodPresssureDefaultValue = {
   },
   unit: "mmHg",
 };
+
+const memberID = "b27dd5b7-a0e6-4d90-9b21-595af766f005";
+const familyID = "ec833f94-21eb-42e8-b510-84a325b2fe53";
+export const hardcodedID = {
+  memberID,
+  familyID,
+};
