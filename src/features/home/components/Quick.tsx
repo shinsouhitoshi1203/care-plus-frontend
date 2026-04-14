@@ -5,7 +5,7 @@ import { createContext } from "react";
 import { View } from "react-native";
 import WelcomeComponent from "./Welcome";
 import BigHelpButton from "./buttons/BigHelp";
-export const QuickComponentContext = createContext();
+export const QuickComponentContext = createContext("");
 function QuickComponent() {
   const { data } = useQuery({
     queryKey: ["user"],

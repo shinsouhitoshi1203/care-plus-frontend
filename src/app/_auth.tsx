@@ -19,6 +19,7 @@ function AuthProvider() {
               <Stack.Screen name="(auth)" />
               <Stack.Protected guard={isAuthenticated}>
                 <Stack.Screen name="protected/(tabs)" />
+                <Stack.Screen name="protected/records" />
               </Stack.Protected>
             </Stack>
           )}
