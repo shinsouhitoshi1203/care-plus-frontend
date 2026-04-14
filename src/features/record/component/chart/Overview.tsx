@@ -2,7 +2,7 @@ import { Button } from "@rneui/themed";
 import { ArrowRight } from "lucide-react-native";
 import { Text, View } from "react-native";
 import BaseLineChart from ".";
-import SelectMetricDropdown from "../dropdown/SelectMetric";
+import SelectMetricSmallDropdown from "../dropdown/SelectMetric";
 export default function OverviewHealthRecordChart() {
   return (
     <View
@@ -16,7 +16,7 @@ export default function OverviewHealthRecordChart() {
     >
       <View className="mb-4 flex ">
         <View className=" flex flex-row justify-between gap-2">
-          <SelectMetricDropdown />
+          <SelectMetricSmallDropdown />
           <Button
             icon={<ArrowRight size={24} color="white" />}
             buttonStyle={{

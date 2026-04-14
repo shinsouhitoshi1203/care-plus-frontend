@@ -2,6 +2,7 @@ import QuickComponent from "@/features/home/components/Quick";
 import OverviewHealthRecordChart from "@/features/record/component/chart/Overview";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
+import FullSize from "@/components/buttons/FullSize";
 import { useRouter } from "expo-router";
 import { Pill, PlusCircle } from "lucide-react-native";
 
@@ -75,6 +76,7 @@ function QuickActionButton({
 }
 
 export default function HomePage() {
+  const router = useRouter();
   return (
     <ScrollView>
       <QuickComponent />
@@ -82,10 +84,12 @@ export default function HomePage() {
       <View className="flex-1 flex" style={{ paddingHorizontal: 24 }}>
         <View className="rounded-[28px] my-6">
           <View className="flex-row gap-3">
-            {quickActions.map(({ id, ...action }) => (
+            {/* {quickActions.map(({ id, ...action }) => (
               <QuickActionButton key={id} {...action} />
-            ))}
+            ))} */}
           </View>
+          <FullSize onPress={() => router.navigate("/protected/records/add")} title="Thêm lịch uống"></FullSize>
+          <FullSize onPress={() => router.navigate("/protected/records")} title="Chỉ số sức khỏe"></FullSize>
         </View>
         <OverviewHealthRecordChart />
       </View>
