@@ -1,23 +1,19 @@
 import { Input } from "@rneui/themed";
-import { useCallback, useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
+import useDynamicMetricInput from "../../hooks/useDynamicMetricInput";
 
 export default function WeightField() {
-  const { control, setValue, clearErrors } = useFormContext();
-  const setValueHandler = useCallback(
-    (value: number) => {
-      setValue("value", { _: value });
-    },
-    [setValue]
-  );
-  useEffect(() => {
-    setValue("_weight", "");
-  }, [setValue]);
+  const { control, clearErrors } = useFormContext();
+
+  const { setValueHandler } = useDynamicMetricInput({
+    type: "weight",
+  });
+
   return (
     <Controller
       name="_weight"
       control={control}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         const { value, onChange } = field;
         return (
           <>
@@ -27,8 +23,8 @@ export default function WeightField() {
               value={value}
               onChangeText={(x) => {
                 clearErrors();
-                onChange(Number.parseFloat(x));
-                setValueHandler(Number.parseFloat(x));
+                onChange(x);
+                setValueHandler({ value: x });
               }}
             />
           </>

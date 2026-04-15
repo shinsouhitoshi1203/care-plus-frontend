@@ -1,19 +1,11 @@
 import { Input } from "@rneui/themed";
-import { useCallback, useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
+import useDynamicMetricInput from "../../hooks/useDynamicMetricInput";
 
 export default function BloodSugarField() {
-  const { control, setValue, clearErrors } = useFormContext();
-  const setValueHandler = useCallback(
-    (value: number) => {
-      setValue("value", { _: value });
-    },
-    [setValue]
-  );
+  const { control, clearErrors } = useFormContext();
+  const { setValueHandler } = useDynamicMetricInput({ type: "blood_sugar" });
 
-  useEffect(() => {
-    setValue("_blood_sugar", "");
-  }, [setValue]);
   return (
     <Controller
       name="_blood_sugar"
@@ -27,8 +19,8 @@ export default function BloodSugarField() {
             value={value}
             onChangeText={(x) => {
               clearErrors();
-              onChange(Number.parseFloat(x));
-              setValueHandler(Number.parseFloat(x));
+              onChange(x);
+              setValueHandler({ value: x });
             }}
           />
         );

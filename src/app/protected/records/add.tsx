@@ -46,7 +46,17 @@ export default function AddRecordPage() {
   const watchType = watch("type");
 
   useEffect(() => {
-    console.log(watchType);
+    const input = healthMetricsMap[watchType]?.inputName;
+    if (Array.isArray(input)) {
+      input.forEach((name) => {
+        setValue(name, "");
+      });
+    } else {
+      setValue(input, "");
+    }
+  }, [watchType, setValue]);
+
+  useEffect(() => {
     const metric: any = healthMetricsMap[watchType];
     setValue("unit", metric?.unit);
   }, [watchType, setValue]);
@@ -120,7 +130,7 @@ export default function AddRecordPage() {
               );
             }}
           />
-          {errors.value && <Error.Block text={"Giá trị nhập vào không hợp lệ"} />}
+          {errors.value && <Error.Block text={errors.value.message} />}
           {errors.root && <Error.Block text={errors.root.message} />}
           <FormProvider {...methods}>
             <InputDynamicLayout />

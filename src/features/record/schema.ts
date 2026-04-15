@@ -29,6 +29,14 @@ export const bloodSugarSchema = z.object({
 });
 
 export const healthRecordSchema = z.discriminatedUnion("type", [bloodPressureSchema, weightSchema, bloodSugarSchema]);
+
+export const editHealthRecordSchema = z.discriminatedUnion("type", [
+  bloodPressureSchema.omit({ unit: true }),
+  weightSchema.omit({ unit: true }),
+  bloodSugarSchema.omit({ unit: true }),
+]);
+export type EditHealthRecordProps = z.infer<typeof editHealthRecordSchema>;
+
 // export type AddHealthRecordProps = z.infer<typeof healthRecordSchema> & { value: Record<string, any> | null };
 export const bloodPresssureDefaultValue = {
   type: "blood_pressure",

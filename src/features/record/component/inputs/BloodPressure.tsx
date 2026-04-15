@@ -1,11 +1,11 @@
 import { Input } from "@rneui/themed";
-import { useCallback, useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { Text, View } from "react-native";
+import useDynamicMetricInput from "../../hooks/useDynamicMetricInput";
 
 export default function BloodPressureField() {
-  const { control, setValue, getValues, clearErrors } = useFormContext();
-  const setValueHandler = useCallback(
+  const { control, clearErrors } = useFormContext();
+  /* const setValueHandler = useCallback(
     (type: "systolic" | "diastolic", value: number) => {
       const old = getValues("value") || {};
       setValue("value", {
@@ -20,6 +20,17 @@ export default function BloodPressureField() {
     setValue("_blood_pressure_systolic", "");
     setValue("_blood_pressure_diastolic", "");
   }, [setValue]);
+
+  const mode = watch("mode");
+  useEffect(() => {
+    if (mode === "edit") {
+      const value = getValues("value");
+      setValue("_blood_pressure_systolic", value?.systolic.toString() || "");
+      setValue("_blood_pressure_diastolic", value?.diastolic.toString() || "");
+    }
+  }, [mode, setValue, getValues]); */
+
+  const { setValueHandler } = useDynamicMetricInput({ type: "blood_pressure" });
 
   return (
     <>
@@ -39,8 +50,8 @@ export default function BloodPressureField() {
                 value={value}
                 onChangeText={(x) => {
                   clearErrors();
-                  onChange(Number.parseFloat(x));
-                  setValueHandler("systolic", Number.parseFloat(x));
+                  onChange(x);
+                  setValueHandler({ input: "_blood_pressure_systolic", value: x });
                 }}
                 containerStyle={{ width: 100 }}
               />
@@ -64,8 +75,8 @@ export default function BloodPressureField() {
                 value={value}
                 onChangeText={(x) => {
                   clearErrors();
-                  onChange(Number.parseFloat(x));
-                  setValueHandler("diastolic", Number.parseFloat(x));
+                  onChange(x);
+                  setValueHandler({ input: "_blood_pressure_diastolic", value: x });
                 }}
                 containerStyle={{ width: 100 }}
               />

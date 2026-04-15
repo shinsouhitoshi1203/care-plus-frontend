@@ -1,4 +1,5 @@
 import apiClient from "@/config/axios";
+import secureStore from "@/stores/secureStore";
 
 export interface HealthRecordProps {
   memberID: string;
@@ -88,7 +89,7 @@ class CRecordAPI {
       });
       return response.data;
     } catch (error) {
-      console.error("Error creating health record:", error);
+      console.log(" !!! Error creating health record:", error);
       throw error;
     }
   }
@@ -101,27 +102,49 @@ class CRecordAPI {
           date: recorded_at,
         },
       });
-      console.log("Fetched health records:", response.data);
+      // console.log("Fetched health records:", response.data);
       return response.data.data.records;
     } catch (error) {
-      console.error("Error fetching health records:", error);
+      console.log(" !!! Error fetching health records:", error);
       throw error;
     }
   }
 
-  async updateHealthRecord({
-    memberID,
-    familyID,
-    recordID,
-    ...rest
-  }: Omit<HealthRecordProps, "recorded_at" | "type" | "unit">) {
+  async getHealthRecordFromLocal(localRecordID: string) {
+    // Get health record from local storage, used for edit page to get the record data before update
+    try {
+      const localTarget = await secureStore.get(`health-records.edit-target`);
+      if (!localRecordID || !localTarget) {
+        throw new Error("No record found in local storage for ID: " + localRecordID);
+      }
+      const record = JSON.parse(localTarget);
+      return record;
+    } catch (error) {
+      console.log(" !!! Error fetching health record from local storage:", error);
+      throw error;
+    }
+  }
+
+  async saveEditTargetToLocal(data: Omit<HealthRecordProps, "recorded_at" | "type" | "unit">) {
+    try {
+      await secureStore.set(`health-records.edit-target`, JSON.stringify(data));
+    } catch (error) {
+      console.log(" !!! Error saving health record to local storage:", error);
+      throw error;
+    }
+  }
+
+  async updateHealthRecord(
+    recordID: string,
+    { memberID, familyID, ...rest }: Omit<HealthRecordProps, "recorded_at" | "type" | "unit">
+  ) {
     try {
       const response = await apiClient.patch(`${this.makeBaseURL({ memberID, familyID })}/${recordID}`, {
         ...rest,
       });
       return response.data;
     } catch (error) {
-      console.error("Error updating health record:", error);
+      console.log(" !!! Error updating health record:", error);
       throw error;
     }
   }
@@ -135,7 +158,7 @@ class CRecordAPI {
       const response = await apiClient.delete(`${this.makeBaseURL({ memberID, familyID })}/${recordID}`);
       return response.data;
     } catch (error) {
-      console.error("Error deleting health record:", error);
+      console.log(" !!! Error deleting health record:", error);
       throw error;
     }
   }

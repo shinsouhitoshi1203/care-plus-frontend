@@ -1,18 +1,12 @@
+import { formatDateTime } from "@/utils/datetime";
 import { Button, ListItem } from "@rneui/themed";
 import { useRouter } from "expo-router";
-import {
-  Activity,
-  Droplets,
-  HeartPulse,
-  PencilIcon,
-  Scale,
-  StickyNote,
-  Thermometer,
-  TrashIcon,
-} from "lucide-react-native";
+import { Activity, Droplets, HeartPulse, PencilIcon, Scale, StickyNote, TrashIcon } from "lucide-react-native";
 import { useRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
+import { RecordAPI } from "../../api";
 import useDeleteItem from "../../hooks/useDeleteItem";
+import { hardcodedID } from "../../schema";
 interface HealthRecordItem {
   _id?: string;
   type: string;
@@ -30,7 +24,7 @@ const recordTypeConfig: Record<
     description: string;
     icon: typeof Activity;
     accent: string;
-    iconBackground: string;
+    bg: string;
     iconColor: string;
   }
 > = {
@@ -39,7 +33,7 @@ const recordTypeConfig: Record<
     description: "Chỉ số tim mạch",
     icon: HeartPulse,
     accent: "bg-rose-500/10",
-    iconBackground: "bg-rose-500/15",
+    bg: "bg-rose-500",
     iconColor: "#e11d48",
   },
   blood_sugar: {
@@ -47,7 +41,7 @@ const recordTypeConfig: Record<
     description: "Chỉ số glucose",
     icon: Droplets,
     accent: "bg-sky-500/10",
-    iconBackground: "bg-sky-500/15",
+    bg: "bg-sky-500",
     iconColor: "#0284c7",
   },
   weight: {
@@ -55,7 +49,7 @@ const recordTypeConfig: Record<
     description: "Chỉ số cơ thể",
     icon: Scale,
     accent: "bg-emerald-500/10",
-    iconBackground: "bg-emerald-500/15",
+    bg: "bg-emerald-500",
     iconColor: "#059669",
   },
 };
@@ -69,30 +63,16 @@ function getRecordValue(item: HealthRecordItem) {
       return `${systolic}/${diastolic}`;
     }
   }
-
   const firstValue = Object.values(item.value)[0];
   return typeof firstValue === "number" ? `${firstValue}` : "—";
 }
-function formatDate(value?: string) {
-  if (!value) return "Chưa có thời gian";
 
-  return new Date(value).toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 function getRecordConfig(type: string) {
   return (
     recordTypeConfig[type] ?? {
       title: type.replace(/_/g, " "),
-      description: "Bản ghi sức khỏe",
-      icon: Thermometer,
       accent: "bg-slate-500/10",
-      iconBackground: "bg-slate-500/15",
-      iconColor: "#475569",
+      bg: "bg-slate-500/15",
     }
   );
 }
@@ -112,15 +92,35 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 });
-const RecordItem = ({ item }) => {
+
+interface RecordItemProps {
+  item: HealthRecordItem & { _id: string };
+  disabled?: boolean;
+}
+
+const RecordItem = ({ item, disabled }: RecordItemProps) => {
   const config = getRecordConfig(item.type);
   // const Icon = config.icon;
   const id = useRef(item._id);
+
+  const { _id, ...allowedPayload } = item;
+
   const handleDeleteDialog = useDeleteItem(id.current);
   const router = useRouter();
 
-  const handleEdit = () => {
-    router.navigate("/protected/records/edit", {});
+  const handleEdit = async () => {
+    // console.log(rawData.current);
+    // Check only allow to update if the created_at is the same date as now, otherwise block
+    if (new Date(item.created_at).toDateString() !== new Date().toDateString()) {
+      Alert.alert("Lỗi", "Chỉ có thể chỉnh sửa lần đo trong ngày");
+      return;
+    }
+
+    await RecordAPI.saveEditTargetToLocal({
+      ...allowedPayload,
+      ...hardcodedID,
+    });
+    router.navigate({ pathname: "/protected/records/[recordID]/edit", params: { recordID: id.current } });
   };
 
   return (
@@ -129,21 +129,35 @@ const RecordItem = ({ item }) => {
         <View className="flex flex-row items-start justify-between gap-4">
           <View className="flex-1">
             <Text className="mt-1 text-sm text-slate-700">
-              {formatDate(item.updated_at ?? item.recorded_at ?? item.created_at)}
+              {formatDateTime(item.updated_at ?? item.recorded_at ?? item.created_at)}
             </Text>
-            <View className="mb-3 flex flex-row">
-              <Text className="text-base font-bold text-slate-900">{config.title}</Text>
-            </View>
-            <View className="items-start flex flex-row gap-2 rounded-2xl bg-slate-900 px-3 py-2 self-start">
-              <Text className="text-2xl font-bold leading-5 text-white">{getRecordValue(item)}</Text>
-              <Text className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
-                {item.unit}
-              </Text>
+            <View className="flex flex-row items-center gap-3 pt-4">
+              <View className="flex flex-row items-center h-[100%]">
+                <Text className="text-base font-bold text-slate-900">{config.title}</Text>
+              </View>
+              <View className={`items-start flex flex-row gap-2 rounded-2xl ${config.bg} px-3 py-2`}>
+                <Text className="text-2xl font-bold leading-5 text-white">{getRecordValue(item)}</Text>
+                <Text className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+                  {item.unit}
+                </Text>
+              </View>
             </View>
           </View>
           <View className="ml-2 mt-1 shrink-0 flex flex-row gap-3">
-            <Button icon={<PencilIcon />} type="clear" onPress={handleEdit} />
-            <Button icon={<TrashIcon />} type="clear" onPress={handleDeleteDialog} />
+            <Button
+              icon={<PencilIcon />}
+              type="clear"
+              onPress={handleEdit}
+              disabled={disabled}
+              buttonStyle={{ opacity: disabled ? 0.5 : 1 }}
+            />
+            <Button
+              icon={<TrashIcon />}
+              type="clear"
+              onPress={handleDeleteDialog}
+              disabled={disabled}
+              buttonStyle={{ opacity: disabled ? 0.5 : 1 }}
+            />
           </View>
         </View>
 
