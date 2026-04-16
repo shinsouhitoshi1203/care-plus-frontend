@@ -1,3 +1,4 @@
+import noteInDevelopment from "@/utils/dev";
 import { Button } from "@rneui/themed";
 import { ArrowRight } from "lucide-react-native";
 import { Text, View } from "react-native";
@@ -25,6 +26,7 @@ export default function OverviewHealthRecordChart() {
               borderWidth: 1,
               borderColor: "rgba(255, 255, 255, 0.22)",
             }}
+            onPress={() => noteInDevelopment()}
           />
         </View>
         <View className="flex flex-row gap-2 justify-center align-center my-4">

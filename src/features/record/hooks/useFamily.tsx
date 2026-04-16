@@ -16,9 +16,10 @@ export const defaultSelector = (data: any) => {
   };
 };
 
-export const ownerInFamilySelector = (data: any) => {
+export const ownerInFamilySelector = (data: { family: any[] }) => {
   const { family } = data || {};
   return {
+    isOwner: family.some((f: any) => f.family_role === "OWNER"),
     families: [...family].filter((f: any) => f.family_role === "OWNER"),
   };
 };
@@ -28,14 +29,13 @@ export default function useFamily(selector = defaultSelector, options = { needPe
     queryKey: ["family.info"],
     queryFn: async () => {
       const user = await AccountAPI.getAccount();
-      console.log(user);
       return {
         id: user.id as string,
         family: user.family as any,
       };
     },
     select: (user) => {
-      return selector(user);
+      return selector(user as any);
     },
   });
   if (options?.needPending) {

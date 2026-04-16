@@ -36,7 +36,7 @@ export default function RecordListLayout({ memberID }: { memberID: string }) {
     <Skeleton animation="pulse" height={400} />
   ) : (
     <View className="flex-1">
-      <Text>Member ID: {memberID}</Text>
+      {/* <Text>Member ID: {memberID}</Text> */}
       <FlatList
         data={records}
         keyExtractor={(item, index) => item._id ?? item.updated_at ?? item.recorded_at ?? `${item.type}-${index}`}

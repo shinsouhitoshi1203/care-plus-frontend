@@ -20,7 +20,5 @@ export default function RecordListPage() {
     return id || myID;
   }, [id, myID]);
 
-  return (
-    <View className="pt-8 flex-1">{memberID ? <RecordListLayout memberID={memberID} /> : <SkeletonLoader />}</View>
-  );
+  return <View className=" flex-1">{memberID ? <RecordListLayout memberID={memberID} /> : <SkeletonLoader />}</View>;
 }

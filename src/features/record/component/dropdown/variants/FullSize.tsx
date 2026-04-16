@@ -46,17 +46,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: "#fff",
     padding: 0,
-    minWidth: 200,
+    minWidth: 100,
   },
   icon: {
     marginRight: 5,
   },
   placeholderStyle: {
-    fontSize: 16,
+    fontSize: 18,
     color: "black",
   },
   selectedTextStyle: {
-    fontSize: 16,
+    fontSize: 18,
     color: "black",
   },
   iconStyle: {

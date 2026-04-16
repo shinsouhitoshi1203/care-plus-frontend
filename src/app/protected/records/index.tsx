@@ -2,7 +2,7 @@ import IconTextButton from "@/components/buttons/IconTextButton";
 import OverviewHealthRecordLayout from "@/features/record/layouts/overview";
 import useSubPageTitle from "@/hooks/useSubPageTitle";
 import { useRouter } from "expo-router";
-import { Plus } from "lucide-react-native";
+import { HeartPulseIcon, Plus } from "lucide-react-native";
 import { useMemo } from "react";
 import { View } from "react-native";
 
@@ -20,8 +20,8 @@ export default (function RecordDashboardPage() {
         bg: "error",
       },
       {
-        icon: Plus,
-        title: "Xem danh sách",
+        icon: HeartPulseIcon,
+        title: "Xem lần đo trước",
         onPress: () => router.navigate({ pathname: "/protected/records/(list)", params: {} }),
         iconPosition: "top",
         bg: "primary",
