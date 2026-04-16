@@ -89,12 +89,11 @@ function LoginPage() {
     },
     mutationKey: ["user"],
     onSuccess: async (data) => {
-      const { tokens, user } = data;
-      queryClient.setQueryData(["user"], user);
+      const { tokens } = data;
       await TokenService.setTokens(tokens);
-      // await secureStore.set("user", JSON.stringify(user));
+
       if (router.canDismiss()) router.dismissAll();
-      router.replace("/protected/home");
+      router.replace("/protected/(tabs)/home");
     },
     onSettled: () => {},
   });

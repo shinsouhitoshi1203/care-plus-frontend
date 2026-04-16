@@ -38,7 +38,7 @@ function OTPVerification() {
       const {
         data: { user, tokens },
       } = jsonData;
-      queryClient.setQueryData(["user"], user);
+      // queryClient.setQueryData(["user"], user);
       await TokenService.setTokens(tokens);
       await secureStore.delete("otp.email");
       if (router.canDismiss()) router.dismissAll();
