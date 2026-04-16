@@ -4,9 +4,8 @@ import { AxiosError } from "axios";
 import { useCallback } from "react";
 import { Alert } from "react-native";
 import { RecordAPI } from "../api";
-import { hardcodedID } from "../schema";
 
-export default function useDeleteItem(id: string) {
+export default function useDeleteItem(id: string, ownerID: string) {
   const queryClient = useQueryClient();
   const openDialog = useZustandStore((state) => state.openDialog);
   const setLoading = useZustandStore((state) => state.setLoading);
@@ -14,7 +13,7 @@ export default function useDeleteItem(id: string) {
     mutationKey: ["health-record"],
     mutationFn: async () => {
       await RecordAPI.deleteHealthRecord({
-        ...hardcodedID,
+        memberID: ownerID,
         recordID: id,
       });
     },

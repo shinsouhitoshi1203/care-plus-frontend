@@ -13,7 +13,10 @@ export default (function RecordDashboardPage() {
       <View className="flex-1 gap-4  ">
         <OverviewHealthRecordLayout />
         <FullSize title="Thêm mới" onPress={() => router.navigate("/protected/records/add")} />
-        <FullSize title="Xem danh sách" onPress={() => router.navigate("/protected/records/list")} />
+        <FullSize
+          title="Xem danh sách"
+          onPress={() => router.navigate({ pathname: "/protected/records/(list)", params: {} })}
+        />
       </View>
     </>
   );

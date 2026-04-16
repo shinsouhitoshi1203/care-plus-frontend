@@ -1,13 +1,14 @@
 import AuthAPI from "@/features/auth/api";
 import TokenService from "@/features/auth/token";
+import useReset from "@/hooks/useReset";
 import useZustandStore from "@/stores/zustand";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
 import { useCallback } from "react";
 function useLogout() {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const resetAll = useReset();
   const setIsLoading = useZustandStore((state) => state.setLoading);
   const { mutate } = useMutation({
     mutationKey: ["user"],
@@ -17,8 +18,8 @@ function useLogout() {
     },
     onSettled: () => {
       setIsLoading(false);
-      queryClient.removeQueries({ queryKey: ["user"] });
 
+      resetAll();
       // Navigate to login page or perform any other necessary actions after logout
       console.log("User logged out successfully");
       if (router.canDismiss()) router.dismissAll();

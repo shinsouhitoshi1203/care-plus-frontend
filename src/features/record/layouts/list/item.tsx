@@ -6,7 +6,6 @@ import { useRef } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { RecordAPI } from "../../api";
 import useDeleteItem from "../../hooks/useDeleteItem";
-import { hardcodedID } from "../../schema";
 interface HealthRecordItem {
   _id?: string;
   type: string;
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
 });
 
 interface RecordItemProps {
-  item: HealthRecordItem & { _id: string };
+  item: HealthRecordItem & { _id: string; family_member_id: string };
   disabled?: boolean;
 }
 
@@ -102,23 +101,23 @@ const RecordItem = ({ item, disabled }: RecordItemProps) => {
   const config = getRecordConfig(item.type);
   // const Icon = config.icon;
   const id = useRef(item._id);
-
+  const memberID = useRef(item.family_member_id);
   const { _id, ...allowedPayload } = item;
 
-  const handleDeleteDialog = useDeleteItem(id.current);
+  const handleDeleteDialog = useDeleteItem(id.current, memberID.current);
   const router = useRouter();
 
   const handleEdit = async () => {
     // console.log(rawData.current);
     // Check only allow to update if the created_at is the same date as now, otherwise block
-    if (new Date(item.created_at).toDateString() !== new Date().toDateString()) {
+    if (new Date(item.created_at as any).toDateString() !== new Date().toDateString()) {
       Alert.alert("Lỗi", "Chỉ có thể chỉnh sửa lần đo trong ngày");
       return;
     }
 
     await RecordAPI.saveEditTargetToLocal({
       ...allowedPayload,
-      ...hardcodedID,
+      memberID: memberID.current,
     });
     router.navigate({ pathname: "/protected/records/[recordID]/edit", params: { recordID: id.current } });
   };

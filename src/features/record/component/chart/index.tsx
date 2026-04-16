@@ -34,6 +34,7 @@ const chartConfig = {
 const renderDotLabel = ({ x, y, indexData }: { x: number; y: number; indexData: any }) => {
   return (
     <View
+      key={`dot-label-${indexData}-${x}-${y}`}
       style={{
         position: "absolute",
         top: y - 35,

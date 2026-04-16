@@ -26,6 +26,7 @@ export default function HealthRecordLayout() {
       >
         <Stack.Screen name="index" options={{ title: "My Profile" }} />
         <Stack.Screen name="add" options={{ title: "My Profile" }} />
+        <Stack.Screen name="(list)" options={{ title: "My Profile" }} />
       </Stack>
     </>
   );

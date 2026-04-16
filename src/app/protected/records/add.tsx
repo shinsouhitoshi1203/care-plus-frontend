@@ -3,6 +3,7 @@ import { styles } from "@/components/input/style";
 import Error from "@/components/message/Error";
 import { HealthRecordProps, RecordAPI } from "@/features/record/api";
 import FullSizeDropdownComponent from "@/features/record/component/dropdown/variants/FullSize";
+import useFamily from "@/features/record/hooks/useFamily";
 import InputDynamicLayout from "@/features/record/layouts/InputDynamic";
 import { healthMetrics, healthMetricsMap, healthMetricsOptions } from "@/features/record/options/metric";
 import { healthRecordSchema } from "@/features/record/schema";
@@ -18,13 +19,14 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Text, View } from "react-native";
 
 // Tạm thời set cứng để test giao diện, sau này sẽ thay bằng id thật
-const memberID = "b27dd5b7-a0e6-4d90-9b21-595af766f005";
-const familyID = "ec833f94-21eb-42e8-b510-84a325b2fe53";
+// const memberID = "b27dd5b7-a0e6-4d90-9b21-595af766f005";
+// const familyID = "ec833f94-21eb-42e8-b510-84a325b2fe53";
 
 export default function AddRecordPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-
+  const setLoading = useZustandStore((state) => state.setLoading);
+  const { memberID } = useFamily();
   useSubPageTitle("Thêm hồ sơ sức khỏe");
 
   const methods = useForm({
@@ -61,7 +63,6 @@ export default function AddRecordPage() {
     setValue("unit", metric?.unit);
   }, [watchType, setValue]);
 
-  const setLoading = useZustandStore((state) => state.setLoading);
   const { mutate } = useMutation({
     mutationKey: ["health-records"],
     mutationFn: async (data: Partial<HealthRecordProps>) => {
@@ -94,7 +95,6 @@ export default function AddRecordPage() {
       const payload = {
         // hardcode tạm thời, sau này sẽ lấy từ context/auth
         memberID,
-        familyID,
 
         // record
         type,
@@ -105,7 +105,7 @@ export default function AddRecordPage() {
       console.log(payload);
       mutate(payload);
     },
-    [mutate]
+    [mutate, memberID]
   );
   return (
     <>

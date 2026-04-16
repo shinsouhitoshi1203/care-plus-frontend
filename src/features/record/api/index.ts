@@ -15,7 +15,7 @@ export interface HealthRecordProps {
   recordID?: string;
 }
 
-const sampleRecordRequested = {
+/* const sampleRecordRequested = {
   status: "success",
   data: {
     record: {
@@ -61,19 +61,18 @@ const sampleRecordResponse = {
       },
     ],
   },
-};
+}; */
 
 class CRecordAPI {
   /**
    * Makes the base URL for RecordAPI endpoints
-   * @param { memberID, familyID }
-   * @returns `/api/family/{familyId}/members/{memberId}/health`
+   * @param { memberID }
+   * @returns `/api/family/members/{memberId}/health`
    */
 
-  private makeBaseURL({ memberID, familyID }: Pick<HealthRecordProps, "memberID" | "familyID">) {
-    if (!memberID || !familyID)
-      throw new Error("memberID and familyID are required to construct the base URL for RecordAPI");
-    return `/family/${familyID}/members/${memberID}/health`;
+  private makeBaseURL({ memberID }: Pick<HealthRecordProps, "memberID">) {
+    if (!memberID) throw new Error("Không có thông tin của thành viên");
+    return `/family/members/${memberID}/health`;
   }
 
   constructor({ dev }: { dev: boolean }) {
@@ -82,9 +81,9 @@ class CRecordAPI {
     }
   }
 
-  async createHealthRecord({ memberID, familyID, ...rest }: HealthRecordProps) {
+  async createHealthRecord({ memberID, ...rest }: HealthRecordProps) {
     try {
-      const response = await apiClient.post(`${this.makeBaseURL({ memberID, familyID })}`, {
+      const response = await apiClient.post(`${this.makeBaseURL({ memberID })}`, {
         ...rest,
       });
       return response.data;
@@ -94,15 +93,18 @@ class CRecordAPI {
     }
   }
 
-  async getHealthRecords({ memberID, familyID, type, recorded_at }: Record<string, string>) {
+  async getHealthRecords({
+    memberID,
+    type,
+    recorded_at,
+  }: Pick<HealthRecordProps, "memberID"> & Partial<Pick<HealthRecordProps, "type" | "recorded_at">>) {
     try {
-      const response = await apiClient.get(`${this.makeBaseURL({ memberID, familyID })}`, {
+      const response = await apiClient.get(`${this.makeBaseURL({ memberID })}`, {
         params: {
           type,
           date: recorded_at,
         },
       });
-      // console.log("Fetched health records:", response.data);
       return response.data.data.records;
     } catch (error) {
       console.log(" !!! Error fetching health records:", error);
@@ -125,7 +127,7 @@ class CRecordAPI {
     }
   }
 
-  async saveEditTargetToLocal(data: Omit<HealthRecordProps, "recorded_at" | "type" | "unit">) {
+  async saveEditTargetToLocal(data: Omit<HealthRecordProps, "familyID" | "recorded_at" | "type" | "unit">) {
     try {
       await secureStore.set(`health-records.edit-target`, JSON.stringify(data));
     } catch (error) {
@@ -136,10 +138,10 @@ class CRecordAPI {
 
   async updateHealthRecord(
     recordID: string,
-    { memberID, familyID, ...rest }: Omit<HealthRecordProps, "recorded_at" | "type" | "unit">
+    { memberID, ...rest }: Omit<HealthRecordProps, "recorded_at" | "type" | "unit">
   ) {
     try {
-      const response = await apiClient.patch(`${this.makeBaseURL({ memberID, familyID })}/${recordID}`, {
+      const response = await apiClient.patch(`${this.makeBaseURL({ memberID })}/${recordID}`, {
         ...rest,
       });
       return response.data;
@@ -149,13 +151,9 @@ class CRecordAPI {
     }
   }
 
-  async deleteHealthRecord({
-    memberID,
-    familyID,
-    recordID,
-  }: Pick<HealthRecordProps, "memberID" | "familyID" | "recordID">) {
+  async deleteHealthRecord({ memberID, recordID }: Pick<HealthRecordProps, "memberID" | "recordID">) {
     try {
-      const response = await apiClient.delete(`${this.makeBaseURL({ memberID, familyID })}/${recordID}`);
+      const response = await apiClient.delete(`${this.makeBaseURL({ memberID })}/${recordID}`);
       return response.data;
     } catch (error) {
       console.log(" !!! Error deleting health record:", error);
