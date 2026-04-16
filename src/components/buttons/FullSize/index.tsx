@@ -1,15 +1,13 @@
 import { Button } from "@rneui/themed";
 import { memo } from "react";
-import { StyleSheet } from "react-native";
-import { cssRaw } from "./style";
-const styles = StyleSheet.create(cssRaw as any);
+import { styles } from "./style";
 
 interface FullSizeButtonProps {
   title: string;
   onPress?: () => void;
   icon?: React.ComponentType<any>;
   [key: string]: any;
-  variant?: "solid" | "outline" | "clean";
+  variant?: "solid" | "outline" | "clear";
 }
 function FullSizeButton({ variant = "solid", icon, iconDirection, ...props }: FullSizeButtonProps) {
   const IconComponent = icon ?? undefined;
@@ -24,7 +22,7 @@ function FullSizeButton({ variant = "solid", icon, iconDirection, ...props }: Fu
 
   return (
     <>
-      <Button {...props} {...baseProps} type={variant} />
+      <Button {...baseProps} containerStyle={{ width: "100%" }} type={variant} {...props} />
     </>
   );
 }

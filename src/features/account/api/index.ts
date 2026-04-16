@@ -7,7 +7,7 @@ export const AccountAPI = {
       const response = await apiClient.post("/auth/register", registerData);
       return response;
     } catch (error) {
-      console.error("Error during registration:", error);
+      console.log(" !!! Error during registration:", error);
       throw error;
     }
   },
@@ -16,7 +16,7 @@ export const AccountAPI = {
       const response = await apiClient.post("/auth/verify-email", payload);
       return response;
     } catch (error) {
-      console.error("Error during OTP verification:", error);
+      console.log(" !!! Error during OTP verification:", error);
       throw error;
     }
   },
@@ -25,7 +25,7 @@ export const AccountAPI = {
       const response = await apiClient.post("/auth/resend-verify", payload);
       return response;
     } catch (error) {
-      console.error("Error during OTP resend:", error);
+      console.log(" !!! Error during OTP resend:", error);
       throw error;
     }
   },
@@ -35,7 +35,18 @@ export const AccountAPI = {
       const { data } = await apiClient.post("/auth/resend-verify-by-login", { identifier });
       return data.email;
     } catch (error) {
-      console.error("Error during OTP resend by login:", error);
+      console.log(" !!! Error during OTP resend by login:", error);
+      throw error;
+    }
+  },
+
+  // Account CRUD
+  async getAccount() {
+    try {
+      const data = (await apiClient.get("/user/me")).data.data;
+      return data;
+    } catch (error) {
+      console.log(" !!! Error fetching account:", error);
       throw error;
     }
   },

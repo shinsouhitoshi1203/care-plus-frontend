@@ -10,12 +10,17 @@ type DialogState = {
   handler?: () => void | Promise<void>;
 };
 
+type SubPageState = {
+  title?: string;
+};
+
 type ZustandStoreProps = {
   version: string;
   loading: boolean;
 
   behavior: {
     dialog: DialogState;
+    subPage: SubPageState;
   };
 };
 
@@ -23,6 +28,7 @@ type ZustandStoreMethods = {
   setLoading: (loading: boolean) => void;
   openDialog: (dialogData: Omit<DialogState, "isOpen">) => void;
   toggleDialog: () => void;
+  setSubPageTitle: (title: string) => void;
 };
 
 const useZustandStore = create<ZustandStoreProps & ZustandStoreMethods>()(
@@ -39,6 +45,9 @@ const useZustandStore = create<ZustandStoreProps & ZustandStoreMethods>()(
           message: "",
           confirmText: "",
           handler: () => {},
+        },
+        subPage: {
+          title: "",
         },
       },
 
@@ -62,6 +71,12 @@ const useZustandStore = create<ZustandStoreProps & ZustandStoreMethods>()(
       toggleDialog() {
         set((state) => {
           state.behavior.dialog.isOpen = !state.behavior.dialog.isOpen;
+        });
+      },
+
+      setSubPageTitle(title: string) {
+        set((state) => {
+          state.behavior.subPage.title = title;
         });
       },
     }))
