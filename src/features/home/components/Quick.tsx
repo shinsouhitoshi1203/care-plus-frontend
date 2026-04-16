@@ -11,7 +11,7 @@ export const QuickComponentContext = createContext({
 });
 function QuickComponent() {
   const { data } = useQuery({
-    queryKey: ["user"],
+    queryKey: ["user.info"],
     queryFn: async () => {
       return await AccountAPI.getAccount();
     },
@@ -25,15 +25,15 @@ function QuickComponent() {
     },
   });
   return (
-    <QuickComponentContext.Provider value={data}>
-      <View className="flex gap-4 px-8 py-4 rounded-tl-xl rounded-tr-xl bg-blue-100 ">
-        <View className={`w-full flex-row justify-between gap-2 items-center `}>
-          <WelcomeComponent />
-          <QR size={64} url={data?.qr_code_url} />
-        </View>
-        <BigHelpButton />
+    // <QuickComponentContext.Provider value={data}>
+    <View className="flex gap-4 px-8 py-4 rounded-tl-xl rounded-tr-xl bg-blue-100 ">
+      <View className={`w-full flex-row justify-between gap-2 items-center `}>
+        <WelcomeComponent />
+        <QR size={64} url={data?.qr_code_url} />
       </View>
-    </QuickComponentContext.Provider>
+      <BigHelpButton />
+    </View>
+    // </QuickComponentContext.Provider>
   );
 }
 export default QuickComponent;
