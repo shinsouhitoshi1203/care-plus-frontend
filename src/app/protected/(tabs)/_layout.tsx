@@ -11,6 +11,7 @@ export default withWaitFallback(function RootLayout() {
       <ProtectedHeaderLayout />
       <Tabs screenOptions={tabBarOption}>
         <Tabs.Screen name="home" options={{ title: "Home" }} />
+        <Tabs.Screen name="family" options={{ title: "Family" }} />
         <Tabs.Screen name="reminder" options={{ title: "Reminder" }} />
         <Tabs.Screen name="user" options={{ title: "Profile" }} />
       </Tabs>
