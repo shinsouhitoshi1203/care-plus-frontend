@@ -3,15 +3,14 @@ import withWaitFallback from "@/hocs/withWaitFallback";
 import useAuth from "@/hooks/useAuth";
 import useZustandStore from "@/stores/zustand";
 import { Stack } from "expo-router";
-import { useEffect } from "react";
 
 function ProtectedLayout() {
   const { isAuthenticated, isPending } = useAuth();
   const setLoading = useZustandStore((state) => state.setLoading);
-  useEffect(() => {
+  /* useEffect(() => {
     console.log("AuthProvider mounted. Current authentication status:", isAuthenticated);
     console.log("AuthProvider mounted. Current pending status:", isPending);
-  }, [isAuthenticated, isPending]);
+  }, [isAuthenticated, isPending]); */
 
   return (
     <Stack

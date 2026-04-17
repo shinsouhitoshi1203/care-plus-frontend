@@ -1,10 +1,9 @@
 import AuthAPI from "@/features/auth/api";
 import TokenService from "@/features/auth/token";
-import { useIsFetching, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 function useAuth() {
-  const isFetching = useIsFetching({ queryKey: ["user"] });
+  // const isFetching = useIsFetching({ queryKey: ["user"] });
   const { data, isPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
@@ -27,12 +26,12 @@ function useAuth() {
     retry: false,
   });
 
-  useEffect(() => {
+  /* useEffect(() => {
     // Check if tanstack is fetching
     if (isFetching) {
       console.log("Fetching user data...", isFetching);
     }
-  }, [isFetching]);
+  }, [isFetching]); */
   return {
     isAuthenticated: data?.isAuthenticated,
     user: data?.user,

@@ -102,7 +102,7 @@ export default function AddRecordPage() {
         note,
         unit,
       };
-      console.log(payload);
+      // console.log(payload);
       mutate(payload);
     },
     [mutate, memberID]

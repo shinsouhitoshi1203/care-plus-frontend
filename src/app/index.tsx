@@ -1,3 +1,4 @@
+import LoadingRaw from "@/components/Loading/LoadingRaw";
 import AuthAPI from "@/features/auth/api";
 import TokenService from "@/features/auth/token";
 import { useQuery } from "@tanstack/react-query";
@@ -40,6 +41,6 @@ function EntryPage() {
     console.log("Checking authentication status...");
   }
 
-  return <></>;
+  return <LoadingRaw />;
 }
 export default EntryPage;
