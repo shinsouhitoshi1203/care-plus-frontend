@@ -1,11 +1,11 @@
-import Loading from "@/components/Loading/LoadingRaw";
+import LoadingRaw from "@/components/Loading/LoadingRaw";
 import useWait from "@/hooks/useWait";
 import { ComponentType } from "react";
 
 function withWaitFallback<P extends object>(Component: ComponentType<P>) {
   return function WithWaitFallback(props: P) {
     const isLoading = useWait();
-    return isLoading ? <Loading /> : <Component {...props} />;
+    return isLoading ? <LoadingRaw show /> : <Component {...props} />;
   };
 }
 

@@ -1,11 +1,10 @@
 import AuthAPI from "@/features/auth/api";
 import TokenService from "@/features/auth/token";
-import { useIsFetching, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 function useAuth() {
-  const isFetching = useIsFetching({ queryKey: ["user"] });
-  const { data: user, isPending } = useQuery({
+  // const isFetching = useIsFetching({ queryKey: ["user"] });
+  const { data, isPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const { accessToken } = await TokenService.getTokens();
@@ -15,18 +14,27 @@ function useAuth() {
 
       return await AuthAPI.check();
     },
+    select: (user) => {
+      const checkID = user?.id;
+      const checkActive = user?.is_active;
+
+      return {
+        isAuthenticated: !!checkID && checkActive,
+        user,
+      };
+    },
     retry: false,
   });
 
-  useEffect(() => {
+  /* useEffect(() => {
     // Check if tanstack is fetching
     if (isFetching) {
       console.log("Fetching user data...", isFetching);
     }
-  }, [isFetching]);
+  }, [isFetching]); */
   return {
-    isAuthenticated: user?.id !== undefined,
-    user,
+    isAuthenticated: data?.isAuthenticated,
+    user: data?.user,
     isPending,
   }; // Return false if isAuthenticated is undefined (e.g., during initial loading)
 }
