@@ -3,12 +3,14 @@ import FamilyAPI from "@/features/family/api";
 import { FamilyItem, FamilyMemberItem } from "@/features/family/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { CircleUserRound, Copy, Plus, Users } from "lucide-react-native";
+import { CircleUserRound, Copy, Plus, Smartphone, UserPlus, Users } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useRouter } from "expo-router";
 
 function FamilyPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
   const [familyName, setFamilyName] = useState("");
   const [familyAddress, setFamilyAddress] = useState("");
@@ -17,6 +19,9 @@ function FamilyPage() {
   const [activeSection, setActiveSection] = useState<"overview" | "members">("overview");
   const [activeAction, setActiveAction] = useState<"create" | "join" | "invite" | null>("create");
   const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [guestModalVisible, setGuestModalVisible] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestRelation, setGuestRelation] = useState("");
 
   const {
     data: families = [],
@@ -91,6 +96,22 @@ function FamilyPage() {
     onError: (error) => {
       const axiosError = error as AxiosError<{ message?: string }>;
       Alert.alert("Tạo mã mời thất bại", axiosError.response?.data?.message ?? "Có lỗi xảy ra");
+    },
+  });
+
+  const createGuestMemberMutation = useMutation({
+    mutationFn: (payload: { displayName: string; relation?: string }) =>
+      FamilyAPI.createGuestMember(selectedFamily?.family_id as string, payload),
+    onSuccess: () => {
+      Alert.alert("Thành công", "Đã tạo tài khoản phụ mới.");
+      setGuestModalVisible(false);
+      setGuestName("");
+      setGuestRelation("");
+      queryClient.invalidateQueries({ queryKey: ["family-members", selectedFamily?.family_id] });
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      Alert.alert("Thất bại", axiosError.response?.data?.message ?? "Lỗi máy chủ");
     },
   });
 
@@ -290,6 +311,31 @@ function FamilyPage() {
                   Mã mời
                 </Text>
               </Pressable>
+
+              <Pressable
+                style={[
+                  styles.quickActionCard,
+                  !isOwner && styles.quickActionCardDisabled,
+                ]}
+                onPress={() => {
+                  if (selectedFamily?.family_id) {
+                    router.push(`/protected/family/${selectedFamily.family_id}/devices` as any);
+                  }
+                }}
+                disabled={!isOwner}
+              >
+                <Smartphone size={18} color={isOwner ? "#2C5EDB" : "#9AA8BD"} />
+                <Text style={styles.quickActionTitle}>Thiết bị</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.quickActionCard, !isOwner && styles.quickActionCardDisabled]}
+                onPress={() => setGuestModalVisible(true)}
+                disabled={!isOwner}
+              >
+                <UserPlus size={18} color={isOwner ? "#2C5EDB" : "#9AA8BD"} />
+                <Text style={styles.quickActionTitle}>Tài khoản phụ</Text>
+              </Pressable>
             </View>
           </>
         ) : null}
@@ -431,6 +477,49 @@ function FamilyPage() {
                 </View>
               )
             ) : null}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal tạo tài khoản phụ */}
+      <Modal visible={guestModalVisible} transparent animationType="fade" onRequestClose={() => setGuestModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setGuestModalVisible(false)} />
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Thêm tài khoản phụ</Text>
+            <Text style={styles.modalDescription}>Tạo hồ sơ cho người thân (ông bà, trẻ nhỏ) không dùng tài khoản riêng.</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Tên hiển thị (Bắt buộc)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ví dụ: Ông nội, Bé Bi..."
+                value={guestName}
+                onChangeText={setGuestName}
+                placeholderTextColor="#A0AEC0"
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Quan hệ (Không bắt buộc)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ví dụ: Cha, Con..."
+                value={guestRelation}
+                onChangeText={setGuestRelation}
+                placeholderTextColor="#A0AEC0"
+              />
+            </View>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.cancelBtn} onPress={() => setGuestModalVisible(false)}>
+                <Text style={styles.cancelBtnText}>Hủy</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.confirmBtn, !guestName && styles.confirmBtnDisabled]}
+                onPress={() => createGuestMemberMutation.mutate({ displayName: guestName, relation: guestRelation })}
+                disabled={createGuestMemberMutation.isPending || !guestName}
+              >
+                <Text style={styles.confirmBtnText}>{createGuestMemberMutation.isPending ? "Đang tạo..." : "Tạo ngay"}</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>
@@ -729,6 +818,61 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     gap: 12,
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#DCE7F8",
+    gap: 12,
+  },
+  modalDescription: {
+    fontSize: 13,
+    color: "#66758D",
+    lineHeight: 18,
+  },
+  inputGroup: {
+    gap: 4,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#4B5C74",
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8,
+  },
+  cancelBtn: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#AAB8CC",
+    backgroundColor: "#F4F7FB",
+  },
+  cancelBtnText: {
+    color: "#42536B",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  confirmBtn: {
+    flex: 1,
+    backgroundColor: "#2C5EDB",
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: "center",
+  },
+  confirmBtnDisabled: {
+    backgroundColor: "#AAB8CC",
+  },
+  confirmBtnText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 15,
   },
 });
 

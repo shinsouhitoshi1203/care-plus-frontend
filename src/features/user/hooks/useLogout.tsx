@@ -14,7 +14,7 @@ function useLogout() {
     mutationKey: ["user"],
     mutationFn: async () => {
       await AuthAPI.logout();
-      await TokenService.clearTokens();
+      await TokenService.clearAll();
     },
     onSettled: () => {
       setIsLoading(false);
