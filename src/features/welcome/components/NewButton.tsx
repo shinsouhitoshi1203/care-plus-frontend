@@ -1,12 +1,13 @@
 import { Button } from "@rneui/themed";
+import { useRouter } from "expo-router";
 import { useContext } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import ResponsiveContext from "../contexts/Responsive";
 import { ResponsiveProps } from "../hooks/useResponsive";
 
 function NewButton() {
   const { showAuthActionsInOneRow } = useContext<ResponsiveProps>(ResponsiveContext);
-
+  const router = useRouter();
   return (
     <>
       <View
@@ -24,7 +25,7 @@ function NewButton() {
             lineHeight: 22,
           }}
           radius={10}
-          onPress={() => Alert.alert("Thông báo", "Tính năng tạo tài khoản sẽ sớm ra mắt")}
+          onPress={() => router.push("/(auth)/register")}
         />
       </View>
     </>

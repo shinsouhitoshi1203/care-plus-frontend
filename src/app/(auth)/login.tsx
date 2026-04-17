@@ -1,10 +1,13 @@
 import FullSizeButton from "@/components/buttons/FullSize";
 import ControlledInput from "@/components/input/ControlledInput";
+import { styles } from "@/components/input/style";
 import LoadingDialog from "@/components/Loading/LoadingDialog";
+import { AccountAPI } from "@/features/account/api";
 import AuthAPI from "@/features/auth/api";
 import { type LoginRequest, LoginRequestSchema } from "@/features/auth/schema/Login";
 import TokenService from "@/features/auth/token";
 import withWaitFallback from "@/hocs/withWaitFallback";
+import secureStore from "@/stores/secureStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -12,7 +15,7 @@ import { useRouter } from "expo-router";
 import { Lock, Mail } from "lucide-react-native";
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, Text, View } from "react-native";
 const fieldLists = [
   {
     name: "identifier",
@@ -49,9 +52,31 @@ function LoginPage() {
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (loginData: LoginRequest) => await AuthAPI.login(loginData),
-    onError: (error) => {
-      if (error instanceof AxiosError && error.status === 401) {
+    onError: async (error, loginData) => {
+      if (error instanceof AxiosError && error.response?.status === 401) {
         setError("root", { type: "manual", message: "Sai tên đăng nhập hoặc mật khẩu" });
+      } else if (error instanceof AxiosError && error.response?.status === 403) {
+        // Get email address and resend OTP
+        const { identifier } = loginData;
+        try {
+          const email = await AccountAPI.resendOTPByLogin(identifier);
+          await secureStore.set("otp.email", email);
+          router.replace({
+            pathname: "/(auth)/otp",
+            params: {
+              showNeedVerifyInOTPScreen: 1,
+              email: email,
+            },
+          });
+        } catch (error) {
+          console.log(error);
+          setError("root", { type: "manual", message: "Tài khoản đã xác thực hoặc không tồn tại." });
+        }
+      } else if (error instanceof AxiosError && error.response?.status === 500) {
+        setError("root", {
+          type: "manual",
+          message: "Đã có lỗi xảy ra trên máy chủ. Vui lòng thử lại sau.",
+        });
       } else if (error instanceof AxiosError && error.code === "ERR_NETWORK") {
         setError("root", {
           type: "manual",
@@ -64,11 +89,11 @@ function LoginPage() {
     },
     mutationKey: ["user"],
     onSuccess: async (data) => {
-      const { tokens, user } = data;
-      queryClient.setQueryData(["user"], user);
+      const { tokens } = data;
       await TokenService.setTokens(tokens);
-      // await secureStore.set("user", JSON.stringify(user));
-      router.replace("/protected/home");
+
+      if (router.canDismiss()) router.dismissAll();
+      router.replace("/protected/(tabs)/home");
     },
     onSettled: () => {},
   });
@@ -103,17 +128,17 @@ function LoginPage() {
 
           <Pressable
             onPress={() => Alert.alert("Thông báo", "Tính năng quên mật khẩu đang được phát triển")}
-            style={styles.forgotPasswordButton}
+            style={styles.linkContainerRight}
           >
-            <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
+            <Text style={styles.link}>Quên mật khẩu?</Text>
           </Pressable>
 
           <FullSizeButton disabled={isPending} title="Đăng nhập" onPress={handleSubmit(handleLogin)} />
 
-          <View style={styles.registerSection}>
-            <Text style={styles.registerHint}>Chưa có tài khoản?</Text>
-            <Pressable onPress={() => Alert.alert("Thông báo", "Tính năng đăng ký đang được phát triển")}>
-              <Text style={styles.registerAction}>Đăng ký ngay</Text>
+          <View style={styles.bottomSection}>
+            <Text style={styles.bottomHint}>Chưa có tài khoản?</Text>
+            <Pressable onPress={() => router.navigate("/(auth)/register")}>
+              <Text style={styles.bottomAction}>Đăng ký ngay</Text>
             </Pressable>
           </View>
         </View>
@@ -121,48 +146,5 @@ function LoginPage() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  forgotPasswordButton: {
-    alignSelf: "flex-end",
-    marginTop: 2,
-    marginBottom: 22,
-  },
-  forgotPasswordText: {
-    color: "#2C5EDB",
-    fontSize: 21,
-    fontWeight: "700",
-  },
-  loginButton: {
-    minHeight: 58,
-    borderRadius: 13,
-    backgroundColor: "#2C5EDB",
-  },
-  loginButtonTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  loginIcon: {
-    marginLeft: 10,
-  },
-  registerSection: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 28,
-    gap: 6,
-  },
-  registerHint: {
-    color: "#74839A",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  registerAction: {
-    color: "#2C5EDB",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-});
 
 export default withWaitFallback(LoginPage);

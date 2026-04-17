@@ -1,10 +1,13 @@
-export const cssRaw = {
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
   fullButton: {
+    width: "100%",
     display: "flex",
     gap: 20,
     minHeight: 58,
     borderRadius: 13,
-    borderWidth: 2,
+    // borderWidth: 2,
   },
   fullButtonTitle: {
     fontSize: 22,
@@ -14,4 +17,4 @@ export const cssRaw = {
   fullButtonIcon: {
     marginLeft: 10,
   },
-};
+});
