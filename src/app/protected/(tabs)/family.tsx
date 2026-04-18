@@ -7,7 +7,7 @@ import QuickLoginAPI from "@/features/quickLogin/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
-import { CircleUserRound, Copy, Plus, QrCode, Smartphone, UserPlus, Users } from "lucide-react-native";
+import { CircleUserRound, Copy, HeartPulse, Plus, QrCode, Smartphone, UserPlus, Users } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -415,18 +415,36 @@ function FamilyPage() {
                   <Text style={styles.emptyText}>Chưa có thành viên nào.</Text>
                 ) : (
                   <View style={styles.memberList}>
-                    {members.map((member, index) => (
-                      <View
-                        key={member.user_id ?? member.member_id ?? member.id ?? `member-${index}`}
-                        style={styles.memberItem}
-                      >
-                        <Text style={styles.memberName}>{member.full_name ?? "Chưa cập nhật tên"}</Text>
-                        <Text style={styles.memberMeta}>
-                          {member.email ?? member.phone ?? "Chưa có thông tin liên hệ"}
-                        </Text>
-                        <Text style={styles.memberRole}>{member.family_role}</Text>
-                      </View>
-                    ))}
+                    {members.map((member, index) => {
+                      // Dùng user_id cho member có tài khoản (tương thích record cũ), member_id cho guest
+                      const healthMemberId = member.user_id || member.member_id || member.id;
+                      return (
+                        <View
+                          key={member.user_id ?? member.member_id ?? member.id ?? `member-${index}`}
+                          style={styles.memberItem}
+                        >
+                          <Text style={styles.memberName}>{member.full_name ?? "Chưa cập nhật tên"}</Text>
+                          <Text style={styles.memberMeta}>
+                            {member.email ?? member.phone ?? (member.user_id ? "Chưa có thông tin liên hệ" : "Tài khoản phụ")}
+                          </Text>
+                          <View style={styles.memberActions}>
+                            <Text style={styles.memberRole}>{member.family_role}</Text>
+                            <Pressable
+                              style={styles.healthRecordBtn}
+                              onPress={() => {
+                                router.push({
+                                  pathname: "/protected/records/(list)" as any,
+                                  params: { id: healthMemberId },
+                                });
+                              }}
+                            >
+                              <HeartPulse size={14} color="#2C5EDB" />
+                              <Text style={styles.healthRecordBtnText}>Hồ sơ sức khỏe</Text>
+                            </Pressable>
+                          </View>
+                        </View>
+                      );
+                    })}
                   </View>
                 )}
 
@@ -840,6 +858,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
+  },
+  memberActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  healthRecordBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#EDF3FC",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  healthRecordBtnText: {
+    color: "#2C5EDB",
+    fontSize: 12,
+    fontWeight: "700",
   },
   reviewButtons: {
     flexDirection: "row",

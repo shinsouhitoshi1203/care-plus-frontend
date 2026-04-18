@@ -7,27 +7,53 @@ import useFamily from "@/features/record/hooks/useFamily";
 import InputDynamicLayout from "@/features/record/layouts/InputDynamic";
 import { healthMetrics, healthMetricsMap, healthMetricsOptions } from "@/features/record/options/metric";
 import { healthRecordSchema } from "@/features/record/schema";
+import FamilyAPI from "@/features/family/api";
 import useSubPageTitle from "@/hooks/useSubPageTitle";
 import useZustandStore from "@/stores/zustand";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@rneui/themed";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useRouter } from "expo-router";
-import { useCallback, useEffect } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Text, View } from "react-native";
-
-// Tạm thời set cứng để test giao diện, sau này sẽ thay bằng id thật
-// const memberID = "b27dd5b7-a0e6-4d90-9b21-595af766f005";
-// const familyID = "ec833f94-21eb-42e8-b510-84a325b2fe53";
 
 export default function AddRecordPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const setLoading = useZustandStore((state) => state.setLoading);
-  const { memberID } = useFamily();
+  const { memberID, isOwner, familyId } = useFamily();
+  const { targetMemberId } = useLocalSearchParams<{ targetMemberId?: string }>();
   useSubPageTitle("Thêm hồ sơ sức khỏe");
+
+  // Member được chọn (tách riêng khỏi form vì zod schema không có field này)
+  const defaultMemberID = targetMemberId || memberID;
+  const [selectedMemberID, setSelectedMemberID] = useState<string | undefined>(defaultMemberID);
+
+  // Cập nhật khi defaultMemberID load xong (async)
+  useEffect(() => {
+    if (defaultMemberID && !selectedMemberID) {
+      setSelectedMemberID(defaultMemberID);
+    }
+  }, [defaultMemberID, selectedMemberID]);
+
+  // Load danh sách members nếu user là OWNER (để chọn tạo record cho ai)
+  const { data: familyMembers = [] } = useQuery({
+    queryKey: ["family-members-for-record", familyId],
+    queryFn: () => FamilyAPI.getMembers(familyId as string),
+    enabled: Boolean(isOwner && familyId),
+  });
+
+  // Tạo options cho dropdown chọn member
+  const memberOptions = useMemo(() => {
+    if (!isOwner || familyMembers.length === 0) return [];
+    return familyMembers.map((m: any) => ({
+      label: m.full_name || "Chưa đặt tên",
+      // Dùng user_id cho member có tài khoản (tương thích record cũ), member_id cho guest
+      value: m.user_id || m.member_id || m.id,
+    }));
+  }, [isOwner, familyMembers]);
 
   const methods = useForm({
     defaultValues: {
@@ -77,7 +103,6 @@ export default function AddRecordPage() {
     },
     onError: (error) => {
       if (error instanceof AxiosError && error.response?.status === 400) {
-        // Handle specific error cases
         setError("root", { message: "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại." });
         console.log(error.response?.data?.message);
       } else {
@@ -93,24 +118,35 @@ export default function AddRecordPage() {
     (data: Partial<HealthRecordProps>) => {
       const { type, value, note, unit } = data;
       const payload = {
-        // hardcode tạm thời, sau này sẽ lấy từ context/auth
-        memberID,
-
-        // record
+        memberID: selectedMemberID || defaultMemberID,
         type,
         value,
         note,
         unit,
       };
-      // console.log(payload);
       mutate(payload);
     },
-    [mutate, memberID]
+    [mutate, selectedMemberID, defaultMemberID]
   );
   return (
     <>
       <View className="flex-1 gap-4">
         <View className="gap-4">
+          {/* Dropdown chọn thành viên (chỉ hiện khi OWNER) */}
+          {isOwner && memberOptions.length > 0 && (
+            <View>
+              <Text className="mb-2">Tạo hồ sơ cho</Text>
+              <FullSizeDropdownComponent
+                data={memberOptions}
+                defaultValue={selectedMemberID}
+                placeholderText="Chọn thành viên"
+                onChange={({ value }: any) => {
+                  setSelectedMemberID(value);
+                }}
+              />
+            </View>
+          )}
+
           <Controller
             name="type"
             control={control}
@@ -161,3 +197,5 @@ export default function AddRecordPage() {
     </>
   );
 }
+
+
