@@ -1,14 +1,19 @@
 import LoadingDialog from "@/components/Loading/LoadingDialog";
+import Scanner from "@/components/QR/Scanner";
+import TokenService from "@/features/auth/token";
 import FamilyAPI from "@/features/family/api";
 import { FamilyItem, FamilyMemberItem } from "@/features/family/types";
+import QuickLoginAPI from "@/features/quickLogin/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { CircleUserRound, Copy, Plus, Users } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { CircleUserRound, Copy, Plus, QrCode, Smartphone, UserPlus, Users } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 function FamilyPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
   const [familyName, setFamilyName] = useState("");
   const [familyAddress, setFamilyAddress] = useState("");
@@ -17,6 +22,11 @@ function FamilyPage() {
   const [activeSection, setActiveSection] = useState<"overview" | "members">("overview");
   const [activeAction, setActiveAction] = useState<"create" | "join" | "invite" | null>("create");
   const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [guestModalVisible, setGuestModalVisible] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestRelation, setGuestRelation] = useState("");
+  const [scannerVisible, setScannerVisible] = useState(false);
+  const [loginType, setLoginType] = useState<string | null>(null);
 
   const {
     data: families = [],
@@ -40,6 +50,14 @@ function FamilyPage() {
       setSelectedFamilyId(families[0].family_id);
     }
   }, [families, selectedFamilyId]);
+
+  useEffect(() => {
+    const fetchLoginType = async () => {
+      const type = await TokenService.getLoginType();
+      setLoginType(type);
+    };
+    fetchLoginType();
+  }, []);
 
   const isOwner = selectedFamily?.family_role === "OWNER";
 
@@ -94,6 +112,22 @@ function FamilyPage() {
     },
   });
 
+  const createGuestMemberMutation = useMutation({
+    mutationFn: (payload: { displayName: string; relation?: string }) =>
+      FamilyAPI.createGuestMember(selectedFamily?.family_id as string, payload),
+    onSuccess: () => {
+      Alert.alert("Thành công", "Đã tạo tài khoản phụ mới.");
+      setGuestModalVisible(false);
+      setGuestName("");
+      setGuestRelation("");
+      queryClient.invalidateQueries({ queryKey: ["family-members", selectedFamily?.family_id] });
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      Alert.alert("Thất bại", axiosError.response?.data?.message ?? "Lỗi máy chủ");
+    },
+  });
+
   const reviewJoinMutation = useMutation({
     mutationFn: FamilyAPI.reviewJoinRequest,
     onSuccess: async () => {
@@ -108,6 +142,44 @@ function FamilyPage() {
       Alert.alert("Cập nhật thất bại", axiosError.response?.data?.message ?? "Có lỗi xảy ra");
     },
   });
+
+  const quickLoginMutation = useMutation({
+    mutationFn: async ({ token, fingerprint }: { token: string; fingerprint: string }) => {
+      return await QuickLoginAPI.loginByDevice(token, fingerprint);
+    },
+    onSuccess: async (data) => {
+      const { tokens } = data;
+      await TokenService.setTokens(tokens);
+      Alert.alert("Thành công", "Đã liên kết thiết bị thành công!");
+      // Có thể reload home hoặc ở lại family
+    },
+    onError: (error) => {
+      console.log("Quick login error:", error);
+      Alert.alert("Lỗi", "Không thể liên kết thiết bị này.");
+    },
+  });
+
+  const handleScan = async (data: string) => {
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed.type === QuickLoginAPI.QR_TYPE && parsed.device_token && parsed.setup_secret) {
+        setScannerVisible(false);
+        // Lưu data và login (assign thiết bị này)
+        await TokenService.setQuickLoginData({
+          deviceToken: parsed.device_token,
+          fingerprint: parsed.setup_secret,
+        });
+        await quickLoginMutation.mutateAsync({
+          token: parsed.device_token,
+          fingerprint: parsed.setup_secret,
+        });
+      } else {
+        Alert.alert("Mã QR không hợp lệ", "Vui lòng quét mã QR liên kết được tạo từ ứng dụng Care+.");
+      }
+    } catch (e) {
+      Alert.alert("Lỗi", "Mã QR không đúng định dạng.");
+    }
+  };
 
   const quickStats = useMemo(
     () => ({
@@ -186,6 +258,16 @@ function FamilyPage() {
           <Text style={styles.subHeading}>Quản lý nhóm thành viên và mã mời trong Care+</Text>
         </View>
 
+        {loginType !== "quick_login" && (
+          <Pressable
+            style={styles.scannerBanner}
+            onPress={() => setScannerVisible(true)}
+          >
+            <QrCode size={20} color="#FFFFFF" />
+            <Text style={styles.scannerBannerText}>Quét mã QR liên kết thiết bị</Text>
+          </Pressable>
+        )}
+
         <View style={styles.sectionTabs}>
           <Pressable
             onPress={() => setActiveSection("overview")}
@@ -256,40 +338,68 @@ function FamilyPage() {
         {activeSection === "overview" ? (
           <>
             <View style={styles.quickActionGrid}>
-              <Pressable
-                style={[styles.quickActionCard, activeAction === "create" && styles.quickActionCardActive]}
-                onPress={() => handleSelectAction("create")}
-              >
-                <Plus size={18} color={activeAction === "create" ? "#FFFFFF" : "#2C5EDB"} />
-                <Text style={[styles.quickActionTitle, activeAction === "create" && styles.quickActionTitleActive]}>
-                  Tạo mới
-                </Text>
-              </Pressable>
+              {loginType !== "quick_login" && (
+                <Pressable
+                  style={[styles.quickActionCard, activeAction === "create" && styles.quickActionCardActive]}
+                  onPress={() => handleSelectAction("create")}
+                >
+                  <Plus size={18} color={activeAction === "create" ? "#FFFFFF" : "#2C5EDB"} />
+                  <Text style={[styles.quickActionTitle, activeAction === "create" && styles.quickActionTitleActive]}>
+                    Tạo mới
+                  </Text>
+                </Pressable>
+              )}
 
-              <Pressable
-                style={[styles.quickActionCard, activeAction === "join" && styles.quickActionCardActive]}
-                onPress={() => handleSelectAction("join")}
-              >
-                <CircleUserRound size={18} color={activeAction === "join" ? "#FFFFFF" : "#2C5EDB"} />
-                <Text style={[styles.quickActionTitle, activeAction === "join" && styles.quickActionTitleActive]}>
-                  Tham gia
-                </Text>
-              </Pressable>
+              {loginType !== "quick_login" && (
+                <Pressable
+                  style={[styles.quickActionCard, activeAction === "join" && styles.quickActionCardActive]}
+                  onPress={() => handleSelectAction("join")}
+                >
+                  <CircleUserRound size={18} color={activeAction === "join" ? "#FFFFFF" : "#2C5EDB"} />
+                  <Text style={[styles.quickActionTitle, activeAction === "join" && styles.quickActionTitleActive]}>
+                    Tham gia
+                  </Text>
+                </Pressable>
+              )}
 
-              <Pressable
-                style={[
-                  styles.quickActionCard,
-                  activeAction === "invite" && styles.quickActionCardActive,
-                  !isOwner && styles.quickActionCardDisabled,
-                ]}
-                onPress={() => handleSelectAction("invite")}
-                disabled={!isOwner}
-              >
-                <Copy size={18} color={isOwner ? (activeAction === "invite" ? "#FFFFFF" : "#2C5EDB") : "#9AA8BD"} />
-                <Text style={[styles.quickActionTitle, activeAction === "invite" && styles.quickActionTitleActive]}>
-                  Mã mời
-                </Text>
-              </Pressable>
+              {isOwner && (
+                <Pressable
+                  style={[
+                    styles.quickActionCard,
+                    activeAction === "invite" && styles.quickActionCardActive,
+                  ]}
+                  onPress={() => handleSelectAction("invite")}
+                >
+                  <Copy size={18} color={activeAction === "invite" ? "#FFFFFF" : "#2C5EDB"} />
+                  <Text style={[styles.quickActionTitle, activeAction === "invite" && styles.quickActionTitleActive]}>
+                    Mã mời
+                  </Text>
+                </Pressable>
+              )}
+
+              {isOwner && (
+                <Pressable
+                  style={styles.quickActionCard}
+                  onPress={() => {
+                    if (selectedFamily?.family_id) {
+                      router.push(`/protected/family/${selectedFamily.family_id}/devices` as any);
+                    }
+                  }}
+                >
+                  <Smartphone size={18} color="#2C5EDB" />
+                  <Text style={styles.quickActionTitle}>Thiết bị</Text>
+                </Pressable>
+              )}
+
+              {isOwner && (
+                <Pressable
+                  style={styles.quickActionCard}
+                  onPress={() => setGuestModalVisible(true)}
+                >
+                  <UserPlus size={18} color="#2C5EDB" />
+                  <Text style={styles.quickActionTitle}>Tài khoản phụ</Text>
+                </Pressable>
+              )}
             </View>
           </>
         ) : null}
@@ -434,6 +544,55 @@ function FamilyPage() {
           </View>
         </View>
       </Modal>
+
+      {/* Modal tạo tài khoản phụ */}
+      <Modal visible={guestModalVisible} transparent animationType="fade" onRequestClose={() => setGuestModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setGuestModalVisible(false)} />
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Thêm tài khoản phụ</Text>
+            <Text style={styles.modalDescription}>Tạo hồ sơ cho người thân (ông bà, trẻ nhỏ) không dùng tài khoản riêng.</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Tên hiển thị (Bắt buộc)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ví dụ: Ông nội, Bé Bi..."
+                value={guestName}
+                onChangeText={setGuestName}
+                placeholderTextColor="#A0AEC0"
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Quan hệ (Không bắt buộc)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ví dụ: Cha, Con..."
+                value={guestRelation}
+                onChangeText={setGuestRelation}
+                placeholderTextColor="#A0AEC0"
+              />
+            </View>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.cancelBtn} onPress={() => setGuestModalVisible(false)}>
+                <Text style={styles.cancelBtnText}>Hủy</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.confirmBtn, !guestName && styles.confirmBtnDisabled]}
+                onPress={() => createGuestMemberMutation.mutate({ displayName: guestName, relation: guestRelation })}
+                disabled={createGuestMemberMutation.isPending || !guestName}
+              >
+                <Text style={styles.confirmBtnText}>{createGuestMemberMutation.isPending ? "Đang tạo..." : "Tạo ngay"}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={scannerVisible} animationType="slide" onRequestClose={() => setScannerVisible(false)}>
+        <Scanner onScan={handleScan} onClose={() => setScannerVisible(false)} title="Quét mã liên kết thiết bị" />
+      </Modal>
+
+      <LoadingDialog show={quickLoginMutation.isPending} />
     </>
   );
 }
@@ -462,6 +621,26 @@ const styles = StyleSheet.create({
     color: "#66758D",
     fontSize: 14,
     fontWeight: "500",
+  },
+  scannerBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#2C5EDB",
+    borderRadius: 14,
+    paddingVertical: 12,
+    gap: 8,
+    marginBottom: 10,
+    shadowColor: "#2C5EDB",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  scannerBannerText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
   },
   sectionTabs: {
     flexDirection: "row",
@@ -729,6 +908,61 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     gap: 12,
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#DCE7F8",
+    gap: 12,
+  },
+  modalDescription: {
+    fontSize: 13,
+    color: "#66758D",
+    lineHeight: 18,
+  },
+  inputGroup: {
+    gap: 4,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#4B5C74",
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8,
+  },
+  cancelBtn: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#AAB8CC",
+    backgroundColor: "#F4F7FB",
+  },
+  cancelBtnText: {
+    color: "#42536B",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  confirmBtn: {
+    flex: 1,
+    backgroundColor: "#2C5EDB",
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: "center",
+  },
+  confirmBtnDisabled: {
+    backgroundColor: "#AAB8CC",
+  },
+  confirmBtnText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 15,
   },
 });
 
