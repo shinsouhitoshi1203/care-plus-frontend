@@ -33,6 +33,15 @@ function generateUUID(): string {
 }
 
 const QuickLoginAPI = {
+  QR_TYPE: "CP_QUICK_LINK",
+
+  /**
+   * Tạo Secret ngẫu nhiên để làm fingerprint tạm thời khi gán qua QR
+   */
+  generateSetupSecret(): string {
+    return generateUUID();
+  },
+
   /**
    * Đăng nhập nhanh bằng device token (thiết bị người thân gọi tự động)
    */

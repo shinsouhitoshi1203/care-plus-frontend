@@ -1,14 +1,21 @@
-import { Button } from "@rneui/themed";
+import { Button, ButtonProps } from "@rneui/themed";
 
-export default function IconTextButton({ bg = "primary", css = {}, icon, ...props }) {
-  const IconComponent = icon ?? null;
+interface IconTextButtonProps extends ButtonProps {
+  bg?: any;
+  css?: any;
+  icon?: any;
+  iconPosition?: any;
+}
 
-  const styles = {
+export default function IconTextButton({ bg = "primary", css = {}, icon, ...props }: IconTextButtonProps) {
+  const IconComponent = icon ?? (() => null);
+
+  const styles: any = {
     icon: <IconComponent size={48} color="#fff" />,
-    buttonStyle: { ...(props.css ?? {}), height: "100%" },
-    color: "primary",
+    buttonStyle: { ...css, height: "100%" },
+    color: bg,
   };
-  if (bg) styles.color = bg;
+  
   return (
     <>
       <Button {...styles} {...props} />

@@ -13,8 +13,15 @@ function useLogout() {
   const { mutate } = useMutation({
     mutationKey: ["user"],
     mutationFn: async () => {
-      await AuthAPI.logout();
-      await TokenService.clearAll();
+      // Lấy fingerprint trước để gửi lên BE (revoke quick login device token)
+      const fingerprint = await TokenService.getDeviceFingerprint();
+      try {
+        await AuthAPI.logout(fingerprint);
+      } catch (e) {
+        console.error("Logout API error:", e);
+      } finally {
+        await TokenService.clearAll();
+      }
     },
     onSettled: () => {
       setIsLoading(false);

@@ -50,6 +50,7 @@ function LoginPage() {
   });
   const router = useRouter();
   const queryClient = useQueryClient();
+
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (loginData: LoginRequest) => await AuthAPI.login(loginData),
     onError: async (error, loginData) => {

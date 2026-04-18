@@ -6,7 +6,8 @@ import { DeviceItem } from "@/features/quickLogin/types";
 import { FamilyMemberItem } from "@/features/family/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Smartphone, SmartphoneNfc, Shield, Trash2, UserPlus, ChevronLeft } from "lucide-react-native";
+import { Smartphone, SmartphoneNfc, Shield, Trash2, UserPlus, ChevronLeft, QrCode } from "lucide-react-native";
+import QR from "@/components/QR";
 import { useState } from "react";
 import {
   Alert,
@@ -27,6 +28,8 @@ export default function DeviceManagementPage() {
   const [setupModalVisible, setSetupModalVisible] = useState(false);
   const [selectedMember, setSelectedMember] = useState<FamilyMemberItem | null>(null);
   const [setupResult, setSetupResult] = useState<{ device_token: string; member: any } | null>(null);
+  const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [linkingQRData, setLinkingQRData] = useState<string | null>(null);
 
   // Lấy danh sách thiết bị đã gán
   const {
@@ -49,18 +52,36 @@ export default function DeviceManagementPage() {
 
   // Mutation: Setup device cho member
   const setupMutation = useMutation({
-    mutationFn: async (memberId: string) => {
-      const fingerprint = await QuickLoginAPI.getOrCreateFingerprint();
-      const deviceName = QuickLoginAPI.getDeviceName();
-      return await FamilyAPI.setupDevice(familyId!, memberId, {
+    mutationFn: async ({ memberId, isQR }: { memberId: string; isQR?: boolean }) => {
+      // Nếu là QR, dùng một setup_secret ngẫu nhiên thay vì fingerprint của máy này
+      const fingerprint = isQR
+        ? QuickLoginAPI.generateSetupSecret()
+        : await QuickLoginAPI.getOrCreateFingerprint();
+
+      const deviceName = isQR ? `Thiết bị của ${selectedMember?.full_name}` : QuickLoginAPI.getDeviceName();
+
+      const result = await FamilyAPI.setupDevice(familyId!, memberId, {
         device_fingerprint: fingerprint,
         device_name: deviceName,
       });
+
+      return { ...result, setup_secret: fingerprint, isQR };
     },
     onSuccess: async (data) => {
-      setSetupResult(data);
-      // Lưu device_token vào SecureStore để thiết bị này tự động đăng nhập
-      await TokenService.setDeviceToken(data.device_token);
+      if (data.isQR) {
+        // Tạo dữ liệu QR
+        const qrContent = JSON.stringify({
+          type: QuickLoginAPI.QR_TYPE,
+          device_token: data.device_token,
+          setup_secret: data.setup_secret,
+        });
+        setLinkingQRData(qrContent);
+        setQrModalVisible(true);
+      } else {
+        setSetupResult(data);
+        // Lưu device_token vào SecureStore để thiết bị này tự động đăng nhập
+        await TokenService.setDeviceToken(data.device_token);
+      }
       await queryClient.invalidateQueries({ queryKey: ["family-devices", familyId] });
     },
     onError: (error) => {
@@ -95,7 +116,14 @@ export default function DeviceManagementPage() {
     if (!selectedMember) return;
     const memberId = selectedMember.member_id || selectedMember.id;
     if (!memberId) return;
-    setupMutation.mutate(memberId);
+    setupMutation.mutate({ memberId, isQR: false });
+  };
+
+  const handleGenerateQR = (member: FamilyMemberItem) => {
+    setSelectedMember(member);
+    const memberId = member.member_id || member.id;
+    if (!memberId) return;
+    setupMutation.mutate({ memberId, isQR: true });
   };
 
   const handleRevoke = (device: DeviceItem) => {
@@ -119,10 +147,17 @@ export default function DeviceManagementPage() {
     setSetupResult(null);
   };
 
-  // Members chưa có quick-login
+  // Devices đã thực sự hoạt động (đã login)
+  const activeDevices = devices.filter((d) => d.quick_login_at !== null);
+
+  // Members chưa có thiết bị HOẶC có thiết bị nhưng chưa login (pending)
+  // Chỉ những thành viên chưa verify (chưa có user_id) mới được thiết lập đăng nhập nhanh
   const membersWithoutDevice = members.filter((m) => {
     const memberId = m.member_id || m.id;
-    return !devices.some((d) => d.member_id === memberId);
+    const isAlreadyLinked = activeDevices.some((d) => d.member_id === memberId);
+    const isVerified = Boolean(m.user_id);
+
+    return !isAlreadyLinked && !isVerified;
   });
 
   const formatDate = (dateStr: string | null) => {
@@ -177,14 +212,14 @@ export default function DeviceManagementPage() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Smartphone size={18} color="#2C5EDB" />
-            <Text style={styles.cardTitle}>Thiết bị đã thiết lập ({devices.length})</Text>
+            <Text style={styles.cardTitle}>Thiết bị đã hoạt động ({activeDevices.length})</Text>
           </View>
 
-          {devices.length === 0 ? (
+          {activeDevices.length === 0 ? (
             <Text style={styles.emptyText}>Chưa có thiết bị nào được thiết lập đăng nhập nhanh.</Text>
           ) : (
             <View style={styles.deviceList}>
-              {devices.map((device) => (
+              {activeDevices.map((device) => (
                 <View key={device.member_id} style={styles.deviceItem}>
                   <View style={styles.deviceInfo}>
                     <Text style={styles.deviceName}>
@@ -226,26 +261,38 @@ export default function DeviceManagementPage() {
             </Text>
           ) : (
             <View style={styles.memberList}>
-              {membersWithoutDevice.map((member, index) => (
-                <Pressable
-                  key={member.member_id || member.id || `member-${index}`}
-                  style={styles.memberSetupItem}
-                  onPress={() => handleSetup(member)}
-                >
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.memberSetupName}>
-                      {member.full_name ?? "Thành viên"}
-                    </Text>
-                    <Text style={styles.memberSetupMeta}>
-                      {member.email ?? member.phone ?? "Chưa có thông tin"}
-                    </Text>
+              {membersWithoutDevice.map((member, index) => {
+                const memberId = member.member_id || member.id;
+                const isPending = devices.some((d) => d.member_id === memberId && d.quick_login_at === null);
+
+                return (
+                  <View key={memberId || `member-${index}`} style={styles.memberSetupItem}>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        <Text style={styles.memberSetupName}>{member.full_name ?? "Thành viên"}</Text>
+                        {isPending && (
+                          <View style={styles.pendingBadge}>
+                            <Text style={styles.pendingBadgeText}>Chờ quét</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={styles.memberSetupMeta}>{member.email ?? member.phone ?? "Chưa có thông tin"}</Text>
+                    </View>
+                    <View style={styles.memberSetupActions}>
+                    <Pressable onPress={() => handleSetup(member)} style={styles.setupBadge}>
+                      <Smartphone size={14} color="#2C5EDB" />
+                      <Text style={styles.setupBadgeText}>Thiết lập</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => handleGenerateQR(member)}
+                      style={[styles.setupBadge, { backgroundColor: "#F0F9FF", borderColor: "#B9E6FE" }]}
+                    >
+                      <QrCode size={14} color="#026AA2" />
+                      <Text style={[styles.setupBadgeText, { color: "#026AA2" }]}>Mã QR</Text>
+                    </Pressable>
                   </View>
-                  <View style={styles.setupBadge}>
-                    <Smartphone size={14} color="#2C5EDB" />
-                    <Text style={styles.setupBadgeText}>Thiết lập</Text>
-                  </View>
-                </Pressable>
-              ))}
+                </View>
+              )})}
             </View>
           )}
         </View>
@@ -316,11 +363,48 @@ export default function DeviceManagementPage() {
                   Thiết bị này giờ có thể tự động đăng nhập. Khi mở app lần tới, thành viên sẽ
                   vào thẳng trang chủ mà không cần nhập mật khẩu.
                 </Text>
-                <Pressable onPress={closeSetupModal} style={styles.confirmButton}>
-                  <Text style={styles.confirmButtonText}>Hoàn tất</Text>
-                </Pressable>
+                <View style={styles.modalButtons}>
+                  <Pressable onPress={closeSetupModal} style={styles.confirmButton}>
+                    <Text style={styles.confirmButtonText}>Hoàn tất</Text>
+                  </Pressable>
+                </View>
               </View>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal hiển thị mã QR liên kết */}
+      <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setQrModalVisible(false)} />
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>Mã QR liên kết thiết bị</Text>
+              <Pressable onPress={() => setQrModalVisible(false)} hitSlop={8}>
+                <Text style={styles.modalCloseText}>Đóng</Text>
+              </Pressable>
+            </View>
+
+            <View style={styles.modalBody}>
+              <Text style={styles.modalBodyText}>
+                Gửi mã này cho <Text style={{ fontWeight: "700" }}>{selectedMember?.full_name}</Text> để họ quét tại màn hình đăng nhập.
+              </Text>
+
+              <View style={styles.qrContainer}>
+                {linkingQRData && <QR url={linkingQRData} size={200} />}
+              </View>
+
+              <Text style={styles.modalBodyHint}>
+                Mỗi mã QR chỉ dùng được cho một thiết bị. Sau khi quét, thiết bị sẽ tự động được gán và đăng nhập.
+              </Text>
+
+              <View style={styles.modalButtons}>
+                <Pressable onPress={() => setQrModalVisible(false)} style={styles.confirmButton}>
+                  <Text style={styles.confirmButtonText}>Xong</Text>
+                </Pressable>
+              </View>
+            </View>
           </View>
         </View>
       </Modal>
@@ -486,6 +570,32 @@ const styles = StyleSheet.create({
     color: "#2C5EDB",
     fontSize: 12,
     fontWeight: "700",
+  },
+  pendingBadge: {
+    backgroundColor: "#FEF0C7",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: "#FEDF89",
+  },
+  pendingBadgeText: {
+    color: "#B54708",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  memberSetupActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  qrContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#F2F4F7",
   },
   modalOverlay: {
     flex: 1,

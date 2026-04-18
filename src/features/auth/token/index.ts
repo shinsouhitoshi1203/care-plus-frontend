@@ -63,6 +63,14 @@ class TokenService {
     await secureStore.set(this.loginTypeKey, type);
   }
 
+  // === Atomic Quick Login Setup ===
+
+  async setQuickLoginData(data: { deviceToken: string; fingerprint: string }): Promise<void> {
+    await this.setDeviceToken(data.deviceToken);
+    await this.setDeviceFingerprint(data.fingerprint);
+    await this.setLoginType("quick_login");
+  }
+
   // === Clear All ===
 
   async clearAll(): Promise<void> {
