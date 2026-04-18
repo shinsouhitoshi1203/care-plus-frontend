@@ -5,7 +5,7 @@ import LoadingDialog from "@/components/Loading/LoadingDialog";
 import Error from "@/components/message/Error";
 import { AccountAPI } from "@/features/account/api";
 import { RegisterRequest, RegisterRequestSchema } from "@/features/account/schema";
-import secureStore from "@/stores/secureStore";
+import secureStore from "@/stores/secureStore/index";
 import { convertObjectKeys } from "@/utils/string";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";

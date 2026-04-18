@@ -1,5 +1,5 @@
 import apiClient from "@/config/axios";
-import secureStore from "@/stores/secureStore";
+import secureStore from "@/stores/secureStore/index";
 
 export interface HealthRecordProps {
   memberID: string;

@@ -5,7 +5,8 @@ const isWeb = Platform.OS === "web";
 
 async function getTokenService() {
   if (isWeb) {
-    return null;
+    const { default: tokenService } = await import("@/features/auth/token");
+    return tokenService;
   }
 
   const { default: tokenService } = await import("@/features/auth/token");
@@ -13,9 +14,9 @@ async function getTokenService() {
 }
 
 async function makeTokenHeader() {
-  if (isWeb) {
-    return "";
-  }
+  // if (isWeb) {
+  //   return "";
+  // }
 
   const tokenService = await getTokenService();
   if (!tokenService) {
@@ -35,9 +36,9 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   async (config) => {
-    if (isWeb) {
-      return config;
-    }
+    // if (isWeb) {
+    //   return config;
+    // }
 
     const tokenHeader = await makeTokenHeader();
     if (tokenHeader) {
@@ -58,9 +59,9 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error) => {
-    if (isWeb) {
-      return Promise.reject(error);
-    }
+    // if (isWeb) {
+    //   return Promise.reject(error);
+    // }
     const tokenService = await getTokenService();
     if (!tokenService) {
       return Promise.reject(error);

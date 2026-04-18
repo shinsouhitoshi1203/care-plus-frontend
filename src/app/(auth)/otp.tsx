@@ -2,7 +2,7 @@ import Message from "@/components/message";
 import Error from "@/components/message/Error";
 import { AccountAPI } from "@/features/account/api";
 import TokenService from "@/features/auth/token";
-import secureStore from "@/stores/secureStore";
+import secureStore from "@/stores/secureStore/index";
 import useZustandStore from "@/stores/zustand";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";

@@ -7,7 +7,7 @@ import AuthAPI from "@/features/auth/api";
 import { type LoginRequest, LoginRequestSchema } from "@/features/auth/schema/Login";
 import TokenService from "@/features/auth/token";
 import withWaitFallback from "@/hocs/withWaitFallback";
-import secureStore from "@/stores/secureStore";
+import secureStore from "@/stores/secureStore/index";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";

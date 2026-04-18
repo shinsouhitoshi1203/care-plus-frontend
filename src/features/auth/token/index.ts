@@ -1,4 +1,4 @@
-import secureStore from "@/stores/secureStore";
+import secureStore from "@/stores/secureStore/index";
 
 class TokenService {
   private accessTokenKey: string;
