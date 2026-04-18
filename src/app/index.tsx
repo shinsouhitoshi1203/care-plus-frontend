@@ -1,46 +1,68 @@
 import LoadingRaw from "@/components/Loading/LoadingRaw";
 import AuthAPI from "@/features/auth/api";
 import TokenService from "@/features/auth/token";
+import QuickLoginAPI from "@/features/quickLogin/api";
 import { useQuery } from "@tanstack/react-query";
 import { Redirect } from "expo-router";
+
 function EntryPage() {
-  // const { isAuthenticated, isPending } = useAuth();
-
-  // if (isPending) {
-  //   return <LoadingRaw />;
-  // } else {
-  //   if (isAuthenticated) {
-  //     return <Redirect href="/protected/home" />;
-  //   }
-  //   return <Redirect href="/(auth)/welcome" />;
-  // }
-  // // return <Redirect href="/(auth)/welcome" />;
-
-  const { data: isAuthenticated, isPending } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: ["auth.check"],
     queryFn: async () => {
+      // === 1. Thử Quick Login (Device-Bound) trước ===
+      const deviceToken = await TokenService.getDeviceToken();
+      const fingerprint = await TokenService.getDeviceFingerprint();
+
+      if (deviceToken && fingerprint) {
+        try {
+          const result = await QuickLoginAPI.loginByDevice(deviceToken, fingerprint);
+          await TokenService.setTokens(result.tokens);
+          await TokenService.setLoginType("quick_login");
+          return {
+            type: "quick_login" as const,
+            member: result.member,
+            isAuthenticated: true,
+          };
+        } catch (error) {
+          // Device bị revoke hoặc lỗi → xóa device data, fallback sang login thường
+          console.log("Quick login failed, falling back to normal auth:", error);
+          await TokenService.clearDeviceData();
+        }
+      }
+
+      // === 2. Fallback: kiểm tra JWT tokens (luồng hiện tại) ===
       const { accessToken } = await TokenService.getTokens();
       if (!accessToken) {
-        return null;
+        return { type: "none" as const, isAuthenticated: false };
       }
-      return await AuthAPI.check();
-    },
-    select: (user) => {
-      const checkID = user?.id;
-      const checkActive = user?.is_active;
 
-      return !!checkID && checkActive;
+      try {
+        const user = await AuthAPI.check();
+        const isAuthenticated = !!user?.id && user?.is_active;
+        if (isAuthenticated) {
+          await TokenService.setLoginType("full");
+        }
+        return {
+          type: "full" as const,
+          user,
+          isAuthenticated,
+        };
+      } catch {
+        return { type: "none" as const, isAuthenticated: false };
+      }
     },
     retry: false,
   });
-  if (!isPending && isAuthenticated) {
-    return <Redirect href="/protected/home" />;
-  } else if (!isPending && !isAuthenticated) {
-    return <Redirect href="/(auth)/welcome" />;
-  } else {
-    console.log("Checking authentication status...");
+
+  if (isPending) {
+    return <LoadingRaw />;
   }
 
-  return <LoadingRaw />;
+  if (data?.isAuthenticated) {
+    return <Redirect href="/protected/home" />;
+  }
+
+  return <Redirect href="/(auth)/welcome" />;
 }
+
 export default EntryPage;

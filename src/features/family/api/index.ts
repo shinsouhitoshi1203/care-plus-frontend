@@ -1,5 +1,6 @@
 import apiClient from "@/config/axios";
 import { FamilyItem, FamilyMemberItem, JoinStatus } from "../types";
+import { DeviceItem } from "@/features/quickLogin/types";
 
 const FamilyAPI = {
   async getFamilies(): Promise<FamilyItem[]> {
@@ -35,6 +36,34 @@ const FamilyAPI = {
   async reviewJoinRequest(payload: { familyId: string; memberId: string; status: JoinStatus }) {
     const { familyId, memberId, status } = payload;
     const response = await apiClient.patch(`/family/${familyId}/members/${memberId}/status`, { status });
+    return response.data?.data;
+  },
+
+  // =============== Quick Login Device Management (OWNER) ===============
+
+  async setupDevice(
+    familyId: string,
+    memberId: string,
+    data: { device_fingerprint: string; device_name?: string },
+  ): Promise<{ device_token: string; member: { id: string; display_name: string; avatar_url: string | null; family_id: string } }> {
+    const response = await apiClient.post(`/family/${familyId}/members/${memberId}/setup-device`, data);
+    return response.data?.data;
+  },
+
+  async revokeDevice(familyId: string, memberId: string): Promise<void> {
+    await apiClient.delete(`/family/${familyId}/members/${memberId}/revoke-device`);
+  },
+
+  async getDevices(familyId: string): Promise<DeviceItem[]> {
+    const response = await apiClient.get(`/family/${familyId}/devices`);
+    return response.data?.data?.devices ?? [];
+  },
+
+  async createGuestMember(
+    familyId: string,
+    payload: { displayName: string; relation?: string }
+  ): Promise<any> {
+    const response = await apiClient.post(`/family/${familyId}/members/guest`, payload);
     return response.data?.data;
   },
 };
