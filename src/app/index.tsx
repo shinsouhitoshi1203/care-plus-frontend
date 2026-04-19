@@ -1,10 +1,11 @@
 import LoadingRaw from "@/components/Loading/LoadingRaw";
 import AuthAPI from "@/features/auth/api";
 import TokenService from "@/features/auth/token";
+
 import QuickLoginAPI from "@/features/quickLogin/api";
+
 import { useQuery } from "@tanstack/react-query";
 import { Redirect } from "expo-router";
-
 function EntryPage() {
   const { data, isPending } = useQuery({
     queryKey: ["auth.check"],
@@ -62,7 +63,6 @@ function EntryPage() {
     return <Redirect href="/protected/(tabs)/home" />;
   }
 
-  return <Redirect href="/(auth)/welcome" />;
+  return <LoadingRaw />;
 }
-
 export default EntryPage;
