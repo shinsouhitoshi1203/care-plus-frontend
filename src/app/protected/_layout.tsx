@@ -4,13 +4,13 @@ import useAuth from "@/hooks/useAuth";
 import useZustandStore from "@/stores/zustand";
 import { Stack } from "expo-router";
 
-import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { SOSAlertOverlay } from "@/components/SOS/SOSAlertOverlay";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 function ProtectedLayout() {
   const { isAuthenticated, isPending } = useAuth();
   const setLoading = useZustandStore((state) => state.setLoading);
-  
+
   // Khởi tạo hệ thống thông báo đẩy khi đã đăng nhập
   usePushNotifications(isAuthenticated);
 
@@ -27,14 +27,14 @@ function ProtectedLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="medications" />
           <Stack.Screen name="records" />
+          <Stack.Screen name="userDetails" />
           <Stack.Screen name="family/[familyId]" />
         </Stack.Protected>
       </Stack>
-      
+
       {/* Lớp phủ cảnh báo khẩn cấp */}
       <SOSAlertOverlay />
     </>
-
   );
 }
 export default withWaitFallback(ProtectedLayout);

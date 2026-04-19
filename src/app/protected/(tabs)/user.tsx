@@ -1,10 +1,10 @@
 import ListItemButton from "@/components/buttons/ListItemButton";
 import useLogout from "@/features/user/hooks/useLogout";
+import useAuth from "@/hooks/useAuth";
 import { Avatar, ListItem } from "@rneui/themed";
-import { CircleUserRound, LogOutIcon, ShieldCheck, SmartphoneNfc } from "lucide-react-native";
+import { LogOutIcon, ShieldCheck, SmartphoneNfc } from "lucide-react-native";
 import { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import useAuth from "@/hooks/useAuth";
 
 function User() {
   const toggleLogoutDialog = useLogout();
@@ -43,11 +43,7 @@ function User() {
           <Text style={styles.userName}>{user?.full_name || "Thành viên"}</Text>
           <View style={styles.badgeRow}>
             <View style={[styles.badge, isQuickLogin ? styles.quickLoginBadge : styles.fullAccountBadge]}>
-              {isQuickLogin ? (
-                <SmartphoneNfc size={12} color="#856404" />
-              ) : (
-                <ShieldCheck size={12} color="#155724" />
-              )}
+              {isQuickLogin ? <SmartphoneNfc size={12} color="#856404" /> : <ShieldCheck size={12} color="#155724" />}
               <Text style={[styles.badgeText, isQuickLogin ? styles.quickLoginBadgeText : styles.fullAccountBadgeText]}>
                 {isQuickLogin ? "Đăng nhập nhanh" : "Tài khoản đầy đủ"}
               </Text>
@@ -55,8 +51,7 @@ function User() {
           </View>
           {user?.family && user.family.length > 0 && (
             <Text style={styles.familyText}>
-              {user.family[0].family.name} •{" "}
-              {user.family[0].family_role === "OWNER" ? "Chủ hộ" : "Thành viên"}
+              {user.family[0].family.name} • {user.family[0].family_role === "OWNER" ? "Chủ hộ" : "Thành viên"}
             </Text>
           )}
         </View>

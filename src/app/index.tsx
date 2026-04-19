@@ -55,14 +55,14 @@ function EntryPage() {
     retry: false,
   });
 
-  if (isPending) {
-    return <LoadingRaw />;
+  if (!isPending && !data?.isAuthenticated) {
+    return <Redirect href="/(auth)/welcome" />;
   }
 
-  if (data?.isAuthenticated) {
+  if (data?.isAuthenticated && !isPending) {
     return <Redirect href="/protected/(tabs)/home" />;
   }
 
-  return <LoadingRaw />;
+  return <LoadingRaw show />;
 }
 export default EntryPage;

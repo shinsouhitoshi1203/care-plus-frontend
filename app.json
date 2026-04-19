@@ -44,6 +44,7 @@
       "expo-router",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",
+      "expo-notifications",
       [
         "expo-splash-screen",
         {
@@ -79,7 +80,8 @@
           "locationWhenInUsePermission": "Cho phép Care+ truy cập vị trí của bạn khi đang sử dụng ứng dụng.",
           "isAndroidBackgroundLocationEnabled": true
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

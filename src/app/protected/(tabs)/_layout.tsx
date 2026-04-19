@@ -6,6 +6,7 @@ import tabBarOption from "@/layouts/TabNavigator/tabBarOption";
 import { Tabs } from "expo-router";
 
 export default withWaitFallback(function RootLayout() {
+  console.log(11);
   return (
     <>
       <ProtectedHeaderLayout />
