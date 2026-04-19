@@ -59,7 +59,7 @@ function EntryPage() {
   }
 
   if (data?.isAuthenticated) {
-    return <Redirect href="/protected/home" />;
+    return <Redirect href="/protected/(tabs)/home" />;
   }
 
   return <Redirect href="/(auth)/welcome" />;
