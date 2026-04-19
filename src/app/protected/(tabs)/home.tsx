@@ -1,8 +1,8 @@
 import QuickComponent from "@/features/home/components/Quick";
 import { ScrollView, View } from "react-native";
-
 import IconTextButton from "@/components/buttons/IconTextButton";
 import { useRouter } from "expo-router";
+import { SOSButton } from "@/components/SOS/SOSButton";
 import { HeartPulse, Pill, ScanLine } from "lucide-react-native";
 
 export default function HomePage() {
@@ -34,11 +34,14 @@ export default function HomePage() {
     },
   ];
   return (
-    <ScrollView>
+    <ScrollView className="bg-white">
       <QuickComponent />
-      {/* <ChartSample /> */}
+      
+      {/* Nút SOS Khẩn cấp */}
+      <SOSButton />
+
       <View className="flex-1 flex" style={{ paddingHorizontal: 24 }}>
-        <View className="rounded-[28px] my-6">
+        <View className="rounded-[28px] mb-6">
           <View className="flex-row gap-6">
             {quickActions.map(({ id, ...action }) => (
               <View style={{ height: 150 }} key={id} className="flex-1">
