@@ -4,6 +4,7 @@ import { ScrollView, View } from "react-native";
 import IconTextButton from "@/components/buttons/IconTextButton";
 import { useRouter } from "expo-router";
 import { HeartPulse, Pill } from "lucide-react-native";
+import { SOSButton } from "@/components/SOS/SOSButton";
 
 export default function HomePage() {
   const router = useRouter();
@@ -26,11 +27,14 @@ export default function HomePage() {
     },
   ];
   return (
-    <ScrollView>
+    <ScrollView className="bg-white">
       <QuickComponent />
-      {/* <ChartSample /> */}
+      
+      {/* Nút SOS Khẩn cấp */}
+      <SOSButton />
+
       <View className="flex-1 flex" style={{ paddingHorizontal: 24 }}>
-        <View className="rounded-[28px] my-6">
+        <View className="rounded-[28px] mb-6">
           <View className="flex-row gap-6">
             {quickActions.map(({ id, ...action }) => (
               <View style={{ height: 150 }} key={id} className="flex-1">
