@@ -61,4 +61,21 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
+  secondaryAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: "#2C5EDB",
+    borderRadius: 14,
+    backgroundColor: "#F2F7FF",
+  },
+  secondaryActionText: {
+    color: "#2C5EDB",
+    fontSize: 18,
+    fontWeight: "700",
+  },
 });

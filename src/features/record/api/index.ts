@@ -3,7 +3,7 @@ import secureStore from "@/stores/secureStore";
 
 export interface HealthRecordProps {
   memberID: string;
-  familyID: string;
+  familyID?: string;
   // records
   type: string;
   value: Record<string, number>;

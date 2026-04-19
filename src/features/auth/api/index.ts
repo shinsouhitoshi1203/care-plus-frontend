@@ -12,9 +12,11 @@ const AuthAPI = {
     }
   },
 
-  async logout() {
+  async logout(deviceFingerprint?: string | null) {
     try {
-      await apiClient.post("/auth/logout");
+      await apiClient.post("/auth/logout", {
+        device_fingerprint: deviceFingerprint ?? undefined,
+      });
     } catch (error) {
       throw error;
     }

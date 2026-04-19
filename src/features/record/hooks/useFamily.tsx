@@ -8,11 +8,15 @@ import { useQuery } from "@tanstack/react-query";
 
 export const defaultSelector = (data: any) => {
   const { family, id } = data || {};
+  const ownerFamily = family?.find((f: any) => f.family_role === "OWNER");
   return {
     memberID: id,
     user: { id },
-    isOwner: family.some((f: any) => f.family_role === "OWNER"),
-    families: [...family],
+    isOwner: !!ownerFamily,
+    familyId: ownerFamily?.family_id ?? family?.[0]?.family_id ?? null,
+    // FamilyMember.id của user trong family đầu tiên (dùng cho OWNER selector)
+    familyMemberId: ownerFamily?.id ?? family?.[0]?.id ?? null,
+    families: [...(family || [])],
   };
 };
 

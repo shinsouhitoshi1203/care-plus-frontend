@@ -3,15 +3,17 @@ import TokenService from "@/features/auth/token";
 import { useQuery } from "@tanstack/react-query";
 
 function useAuth() {
-  // const isFetching = useIsFetching({ queryKey: ["user"] });
   const { data, isPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const { accessToken } = await TokenService.getTokens();
+
       if (!accessToken) {
         return null;
       }
 
+      // Cả tài khoản thường và Quick Login đều gọi /user/me để lấy profile đầy đủ
+      // Backend đã được cập nhật để trả về profile tương thích cho member
       return await AuthAPI.check();
     },
     select: (user) => {
@@ -21,22 +23,18 @@ function useAuth() {
       return {
         isAuthenticated: !!checkID && checkActive,
         user,
+        loginType: user?.loginType ?? "full",
       };
     },
     retry: false,
   });
 
-  /* useEffect(() => {
-    // Check if tanstack is fetching
-    if (isFetching) {
-      console.log("Fetching user data...", isFetching);
-    }
-  }, [isFetching]); */
   return {
     isAuthenticated: data?.isAuthenticated,
     user: data?.user,
+    loginType: data?.loginType ?? "full",
     isPending,
-  }; // Return false if isAuthenticated is undefined (e.g., during initial loading)
+  };
 }
 
 export default useAuth;

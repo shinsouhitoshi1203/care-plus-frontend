@@ -12,7 +12,7 @@ function SkeletonLoader() {
 }
 
 export default function RecordListPage() {
-  // Get from params or fallback to my own ID if not provided. This allows both viewing family member's records and my own records in the same page.
+
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { memberID: myID } = useFamily();
   const memberID = useMemo<string>(() => {
@@ -20,5 +20,5 @@ export default function RecordListPage() {
     return id || myID;
   }, [id, myID]);
 
-  return <View className=" flex-1">{memberID ? <RecordListLayout memberID={memberID} /> : <SkeletonLoader />}</View>;
+  return <View className="flex-1">{memberID ? <RecordListLayout memberID={memberID} /> : <SkeletonLoader />}</View>;
 }
