@@ -25,6 +25,7 @@ function ProtectedLayout() {
       >
         <Stack.Protected guard={isAuthenticated}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="medications" />
           <Stack.Screen name="records" />
           <Stack.Screen name="family/[familyId]" />
         </Stack.Protected>
@@ -33,6 +34,7 @@ function ProtectedLayout() {
       {/* Lớp phủ cảnh báo khẩn cấp */}
       <SOSAlertOverlay />
     </>
+
   );
 }
 export default withWaitFallback(ProtectedLayout);

@@ -1,10 +1,9 @@
 import QuickComponent from "@/features/home/components/Quick";
 import { ScrollView, View } from "react-native";
-
 import IconTextButton from "@/components/buttons/IconTextButton";
 import { useRouter } from "expo-router";
-import { HeartPulse, Pill } from "lucide-react-native";
 import { SOSButton } from "@/components/SOS/SOSButton";
+import { HeartPulse, Pill, ScanLine } from "lucide-react-native";
 
 export default function HomePage() {
   const router = useRouter();
@@ -23,7 +22,15 @@ export default function HomePage() {
       icon: Pill,
       bg: "green",
       iconPosition: "top",
-      onPress: () => router.navigate("/protected/records"),
+      onPress: () => router.navigate("/protected/medications"),
+    },
+    {
+      id: "scan-prescription",
+      title: "Quét toa thuốc",
+      icon: ScanLine,
+      bg: "orange",
+      iconPosition: "top",
+      onPress: () => router.navigate("/protected/medications/scan"),
     },
   ];
   return (
