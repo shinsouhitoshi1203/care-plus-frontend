@@ -3,7 +3,7 @@ import secureStore from "@/stores/secureStore";
 
 export interface HealthRecordProps {
   memberID: string;
-  familyID: string;
+  familyID?: string;
   // records
   type: string;
   value: Record<string, number>;
@@ -141,6 +141,8 @@ class CRecordAPI {
     { memberID, ...rest }: Omit<HealthRecordProps, "recorded_at" | "type" | "unit">
   ) {
     try {
+      console.log(recordID, memberID);
+
       const response = await apiClient.patch(`${this.makeBaseURL({ memberID })}/${recordID}`, {
         ...rest,
       });

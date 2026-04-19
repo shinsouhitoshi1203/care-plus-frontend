@@ -4,7 +4,7 @@ import Error from "@/components/message/Error";
 import { RecordAPI } from "@/features/record/api";
 import InputDynamicLayout from "@/features/record/layouts/InputDynamic";
 import { healthMetricsMap } from "@/features/record/options/metric";
-import { EditHealthRecordProps, editHealthRecordSchema, hardcodedID } from "@/features/record/schema";
+import { EditHealthRecordProps, editHealthRecordSchema } from "@/features/record/schema";
 import useSubPageTitle from "@/hooks/useSubPageTitle";
 import useZustandStore from "@/stores/zustand";
 import { formatDateTime } from "@/utils/datetime";
@@ -61,9 +61,10 @@ export default function EditRecordByIDPage() {
   const { mutate } = useMutation({
     mutationKey: ["health-records"],
     mutationFn: async (data: EditHealthRecordProps) => {
+      const { memberID } = await RecordAPI.getHealthRecordFromLocal(recordID);
       await RecordAPI.updateHealthRecord(recordID, {
         ...data,
-        ...hardcodedID,
+        memberID,
       });
     },
     onMutate: () => {

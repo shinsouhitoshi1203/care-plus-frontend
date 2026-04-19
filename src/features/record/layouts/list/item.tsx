@@ -104,6 +104,8 @@ const RecordItem = ({ item, disabled }: RecordItemProps) => {
   const memberID = useRef(item.family_member_id);
   const { _id, ...allowedPayload } = item;
 
+  // memberID có thể là id quick login hoặc userid!
+
   const handleDeleteDialog = useDeleteItem(id.current, memberID.current);
   const router = useRouter();
 

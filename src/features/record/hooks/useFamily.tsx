@@ -35,6 +35,7 @@ export default function useFamily(selector = defaultSelector, options = { needPe
       const user = await AccountAPI.getAccount();
       return {
         id: user.id as string,
+
         family: user.family as any,
       };
     },
