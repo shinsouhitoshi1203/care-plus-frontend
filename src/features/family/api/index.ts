@@ -66,6 +66,16 @@ const FamilyAPI = {
     const response = await apiClient.post(`/family/${familyId}/members/guest`, payload);
     return response.data?.data;
   },
+
+  async sendSOS(payload: { latitude?: number; longitude?: number }) {
+    try {
+      const response = await apiClient.post("/family/sos", payload);
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi khi gửi tín hiệu SOS:", error);
+      throw error;
+    }
+  },
 };
 
 export default FamilyAPI;

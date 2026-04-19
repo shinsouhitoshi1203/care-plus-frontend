@@ -26,6 +26,16 @@ const AuthAPI = {
     const data = (await apiClient.get("/user/me")).data.data;
     return data;
   },
+
+  async updateDeviceToken(deviceToken: string) {
+    try {
+      const response = await apiClient.post("/user/device-token", { deviceToken });
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi khi cập nhật device token:", error);
+      throw error;
+    }
+  },
 };
 
 export default AuthAPI;
