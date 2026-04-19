@@ -7,11 +7,7 @@ import { Stack } from "expo-router";
 function ProtectedLayout() {
   const { isAuthenticated, isPending } = useAuth();
   const setLoading = useZustandStore((state) => state.setLoading);
-  /* useEffect(() => {
-    console.log("AuthProvider mounted. Current authentication status:", isAuthenticated);
-    console.log("AuthProvider mounted. Current pending status:", isPending);
-  }, [isAuthenticated, isPending]); */
-
+    
   return (
     <Stack
       screenOptions={stackOptions}

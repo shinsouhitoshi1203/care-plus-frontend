@@ -12,8 +12,7 @@ function SkeletonLoader() {
 }
 
 export default function RecordListPage() {
-  // Hiện tại đang chọn memberID dựa trên query param (nếu có) - chính là field id của FamilyMember
-  // hoặc userID của chính mình, chưa tính tới id của quickDevice. Em làm thì thêm default là id FamilyMember
+
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { memberID: myID } = useFamily();
   const memberID = useMemo<string>(() => {
