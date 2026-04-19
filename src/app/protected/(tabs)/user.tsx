@@ -1,37 +1,74 @@
-import ListItemButton from "@/components/buttons/ListItemButton";
+import ButtonList from "@/components/ButtonList";
 import useLogout from "@/features/user/hooks/useLogout";
 import useAuth from "@/hooks/useAuth";
-import { Avatar, ListItem } from "@rneui/themed";
-import { LogOutIcon, ShieldCheck, SmartphoneNfc } from "lucide-react-native";
+import { Avatar } from "@rneui/themed";
+import { useRouter } from "expo-router";
+import { BellRing, CircleHelp, Info, LogOutIcon, ShieldCheck, SmartphoneNfc } from "lucide-react-native";
 import { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+
+type UserControlItem = {
+  title: string;
+  id: string;
+  subtitle?: string;
+  icon?: React.ComponentType<any>;
+  onPress?: () => void;
+};
 
 function User() {
   const toggleLogoutDialog = useLogout();
   const { user } = useAuth();
+  const router = useRouter();
 
   const isQuickLogin = user?.loginType === "quick_login";
 
-  const UserControlList = useMemo(() => {
+  const UserControlList: UserControlItem[] = useMemo(() => {
     return [
+      {
+        title: "Hướng dẫn sử dụng",
+        id: "guide",
+        subtitle: "Mẹo thao tác và cách dùng nhanh Care+",
+        icon: CircleHelp,
+        onPress: () => router.push("/protected/userDetails/guide"),
+      },
+      {
+        title: "Cài đặt thông báo",
+        id: "notification-setting",
+        subtitle: "Kiểm tra quyền nhận nhắc thuốc và SOS",
+        icon: BellRing,
+        onPress: () =>
+          Alert.alert("Thông báo", "Mở cài đặt hệ thống để bật thông báo cho Care+", [
+            { text: "Để sau", style: "cancel" },
+            { text: "Mở cài đặt", onPress: () => Linking.openSettings() },
+          ]),
+      },
+      {
+        title: "Liên hệ hỗ trợ",
+        id: "support",
+        subtitle: "Gửi email cho đội ngũ Care+",
+        icon: Info,
+        onPress: () => Linking.openURL("mailto:support@careplus.app"),
+      },
       {
         title: "Đăng xuất",
         id: "logout",
         icon: LogOutIcon,
+        subtitle: "Đăng xuất khỏi thiết bị hiện tại",
         onPress: toggleLogoutDialog,
       },
       {
         title: "Phiên bản",
         id: "version",
         subtitle: "version 0.1.0",
+        icon: Info,
       },
     ];
-  }, [toggleLogoutDialog]);
+  }, [router, toggleLogoutDialog]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header Profile Info */}
-      <View style={styles.headerCard}>
+      <Pressable onPress={() => router.push("/protected/userDetails/index")} style={styles.headerCard}>
         <Avatar
           size={80}
           rounded
@@ -41,6 +78,7 @@ function User() {
         />
         <View style={styles.profileInfo}>
           <Text style={styles.userName}>{user?.full_name || "Thành viên"}</Text>
+
           <View style={styles.badgeRow}>
             <View style={[styles.badge, isQuickLogin ? styles.quickLoginBadge : styles.fullAccountBadge]}>
               {isQuickLogin ? <SmartphoneNfc size={12} color="#856404" /> : <ShieldCheck size={12} color="#155724" />}
@@ -55,23 +93,10 @@ function User() {
             </Text>
           )}
         </View>
-      </View>
+      </Pressable>
 
       {/* Settings List */}
-      <View style={styles.listCard}>
-        {UserControlList.map(({ id, title, icon, onPress, subtitle }) => (
-          <ListItem key={id} containerStyle={styles.listItem}>
-            {onPress ? (
-              <ListItemButton title={title} onPress={onPress} icon={icon} />
-            ) : (
-              <ListItem.Content>
-                <ListItem.Title style={styles.listTitle}>{title}</ListItem.Title>
-                {subtitle && <ListItem.Subtitle style={styles.listSubtitle}>{subtitle}</ListItem.Subtitle>}
-              </ListItem.Content>
-            )}
-          </ListItem>
-        ))}
-      </View>
+      <ButtonList data={UserControlList} />
     </ScrollView>
   );
 }
@@ -148,26 +173,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#66758D",
     fontWeight: "500",
-  },
-  listCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#E7EEF8",
-  },
-  listItem: {
-    paddingVertical: 12,
-  },
-  listTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#4A5568",
-  },
-  listSubtitle: {
-    fontSize: 13,
-    color: "#718096",
-    marginTop: 2,
   },
 });
 

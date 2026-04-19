@@ -37,9 +37,6 @@ export const SOSButton = () => {
       console.error("Lỗi khi kích hoạt SOS:", error);
       Alert.alert("Lỗi", "Không thể gửi tín hiệu SOS lúc này. Vui lòng thử lại!");
     },
-    onSuccess: () => {
-      Alert.alert("Đã gửi!", "Tín hiệu SOS đã được phát tán thông qua hệ thống.");
-    },
     onSettled: () => {
       setLoading(false);
     },

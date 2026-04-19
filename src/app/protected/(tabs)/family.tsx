@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { CircleUserRound, Copy, HeartPulse, Plus, QrCode, Smartphone, UserPlus, Users } from "lucide-react-native";
-  
+
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -261,10 +261,7 @@ function FamilyPage() {
         </View>
 
         {loginType !== "quick_login" && (
-          <Pressable
-            style={styles.scannerBanner}
-            onPress={() => setScannerVisible(true)}
-          >
+          <Pressable style={styles.scannerBanner} onPress={() => setScannerVisible(true)}>
             <QrCode size={20} color="#FFFFFF" />
             <Text style={styles.scannerBannerText}>Quét mã QR liên kết thiết bị</Text>
           </Pressable>
@@ -324,11 +321,11 @@ function FamilyPage() {
                   <View style={styles.statsRow}>
                     <View style={styles.statBox}>
                       <Text style={styles.statValue}>{quickStats.members}</Text>
-                      <Text style={styles.statLabel}>Members</Text>
+                      <Text style={styles.statLabel}>Thành viên</Text>
                     </View>
                     <View style={styles.statBox}>
                       <Text style={styles.statValue}>{quickStats.pending}</Text>
-                      <Text style={styles.statLabel}>Pending</Text>
+                      <Text style={styles.statLabel}>Đang chờ</Text>
                     </View>
                   </View>
                 </>
@@ -366,10 +363,7 @@ function FamilyPage() {
 
               {isOwner && (
                 <Pressable
-                  style={[
-                    styles.quickActionCard,
-                    activeAction === "invite" && styles.quickActionCardActive,
-                  ]}
+                  style={[styles.quickActionCard, activeAction === "invite" && styles.quickActionCardActive]}
                   onPress={() => handleSelectAction("invite")}
                 >
                   <Copy size={18} color={activeAction === "invite" ? "#FFFFFF" : "#2C5EDB"} />
@@ -394,10 +388,7 @@ function FamilyPage() {
               )}
 
               {isOwner && (
-                <Pressable
-                  style={styles.quickActionCard}
-                  onPress={() => setGuestModalVisible(true)}
-                >
+                <Pressable style={styles.quickActionCard} onPress={() => setGuestModalVisible(true)}>
                   <UserPlus size={18} color="#2C5EDB" />
                   <Text style={styles.quickActionTitle}>Tài khoản phụ</Text>
                 </Pressable>
@@ -427,7 +418,9 @@ function FamilyPage() {
                         >
                           <Text style={styles.memberName}>{member.full_name ?? "Chưa cập nhật tên"}</Text>
                           <Text style={styles.memberMeta}>
-                            {member.email ?? member.phone ?? (member.user_id ? "Chưa có thông tin liên hệ" : "Tài khoản phụ")}
+                            {member.email ??
+                              member.phone ??
+                              (member.user_id ? "Chưa có thông tin liên hệ" : "Tài khoản phụ")}
                           </Text>
                           <View style={styles.memberActions}>
                             <Text style={styles.memberRole}>{member.family_role}</Text>
@@ -566,12 +559,19 @@ function FamilyPage() {
       </Modal>
 
       {/* Modal tạo tài khoản phụ */}
-      <Modal visible={guestModalVisible} transparent animationType="fade" onRequestClose={() => setGuestModalVisible(false)}>
+      <Modal
+        visible={guestModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setGuestModalVisible(false)}
+      >
         <View style={styles.modalOverlay}>
           <Pressable style={styles.modalBackdrop} onPress={() => setGuestModalVisible(false)} />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Thêm tài khoản phụ</Text>
-            <Text style={styles.modalDescription}>Tạo hồ sơ cho người thân (ông bà, trẻ nhỏ) không dùng tài khoản riêng.</Text>
+            <Text style={styles.modalDescription}>
+              Tạo hồ sơ cho người thân (ông bà, trẻ nhỏ) không dùng tài khoản riêng.
+            </Text>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Tên hiển thị (Bắt buộc)</Text>
               <TextInput
@@ -601,7 +601,9 @@ function FamilyPage() {
                 onPress={() => createGuestMemberMutation.mutate({ displayName: guestName, relation: guestRelation })}
                 disabled={createGuestMemberMutation.isPending || !guestName}
               >
-                <Text style={styles.confirmBtnText}>{createGuestMemberMutation.isPending ? "Đang tạo..." : "Tạo ngay"}</Text>
+                <Text style={styles.confirmBtnText}>
+                  {createGuestMemberMutation.isPending ? "Đang tạo..." : "Tạo ngay"}
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -769,12 +771,15 @@ const styles = StyleSheet.create({
   },
   quickActionGrid: {
     flexDirection: "row",
-    flexWrap: "nowrap",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     gap: 10,
+    // marginBottom: 40,
   },
   quickActionCard: {
     flex: 1,
+    minWidth: 120,
+    height: 80,
     borderWidth: 1,
     borderColor: "#DAE5F7",
     borderRadius: 12,

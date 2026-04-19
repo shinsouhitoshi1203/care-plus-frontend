@@ -3,6 +3,8 @@ import axios from "axios";
 import { Platform } from "react-native";
 const isWeb = Platform.OS === "web";
 
+export const TIMEOUT = 15000; // 15 giây
+
 async function getTokenService() {
   if (isWeb) {
     return null;

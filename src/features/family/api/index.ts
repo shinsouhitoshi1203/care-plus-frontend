@@ -1,6 +1,6 @@
-import apiClient from "@/config/axios";
-import { FamilyItem, FamilyMemberItem, JoinStatus } from "../types";
+import apiClient, { TIMEOUT } from "@/config/axios";
 import { DeviceItem } from "@/features/quickLogin/types";
+import { FamilyItem, FamilyMemberItem, JoinStatus } from "../types";
 
 const FamilyAPI = {
   async getFamilies(): Promise<FamilyItem[]> {
@@ -44,8 +44,11 @@ const FamilyAPI = {
   async setupDevice(
     familyId: string,
     memberId: string,
-    data: { device_fingerprint: string; device_name?: string },
-  ): Promise<{ device_token: string; member: { id: string; display_name: string; avatar_url: string | null; family_id: string } }> {
+    data: { device_fingerprint: string; device_name?: string }
+  ): Promise<{
+    device_token: string;
+    member: { id: string; display_name: string; avatar_url: string | null; family_id: string };
+  }> {
     const response = await apiClient.post(`/family/${familyId}/members/${memberId}/setup-device`, data);
     return response.data?.data;
   },
@@ -59,17 +62,14 @@ const FamilyAPI = {
     return response.data?.data?.devices ?? [];
   },
 
-  async createGuestMember(
-    familyId: string,
-    payload: { displayName: string; relation?: string }
-  ): Promise<any> {
+  async createGuestMember(familyId: string, payload: { displayName: string; relation?: string }): Promise<any> {
     const response = await apiClient.post(`/family/${familyId}/members/guest`, payload);
     return response.data?.data;
   },
 
   async sendSOS(payload: { latitude?: number; longitude?: number }) {
     try {
-      const response = await apiClient.post("/family/sos", payload);
+      const response = await apiClient.post("/family/sos", payload, { timeout: TIMEOUT });
       return response.data;
     } catch (error) {
       console.error("Lỗi khi gửi tín hiệu SOS:", error);
