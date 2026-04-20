@@ -1,0 +1,34 @@
+name: Fast Build APK
+on:
+  workflow_dispatch: # Cho phép người dùng chạy bằng tay qua nút bấm trên Github
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 2. Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: 3. Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          packager: npm
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 4. Install dependencies
+        run: npm install
+
+      - name: 5. Build APK locally on Github Server
+        run: npx eas build -p android --profile preview --local --non-interactive --output=app-release.apk
+
+      - name: 6. Upload APK for Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-preview-apk
+          path: app-release.apk
