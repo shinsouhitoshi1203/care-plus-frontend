@@ -5,9 +5,11 @@ import useSubPageTitle from "@/hooks/useSubPageTitle";
 import noteInDevelopment from "@/utils/dev";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Clock, Pill, Plus, ScanLine } from "lucide-react-native";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Clock, Pill, Plus, ScanLine, Trash2, RotateCw, AlertCircle } from "lucide-react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
+import useAuth from "@/hooks/useAuth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function MedicationsListPage() {
   useSubPageTitle("Danh sách thuốc");
@@ -17,6 +19,10 @@ export default function MedicationsListPage() {
   const [memberId, setMemberId] = useState<string | null>(null);
 
   const { data: families = [] } = useQuery({ queryKey: ["families"], queryFn: FamilyAPI.getFamilies });
+  const { user } = useAuth();
+
+  const selectedFamily = families.find((f) => f.family_id === familyId);
+  const isOwner = selectedFamily?.family_role === "OWNER";
 
   useEffect(() => {
     if (families.length > 0 && !familyId) setFamilyId(families[0].family_id);
@@ -28,11 +34,103 @@ export default function MedicationsListPage() {
     enabled: !!familyId,
   });
 
-  const { data: schedules = [], isFetching } = useQuery({
+  useEffect(() => {
+    // Nếu là MEMBER (không phải OWNER), mặc định chọn bản thân và khóa dropdown
+    if (!isOwner && members.length > 0 && user) {
+      const self = members.find((m) => m.user_id === user.id);
+      if (self) {
+        setMemberId(self.member_id || self.id || null);
+      }
+    }
+  }, [isOwner, members, user]);
+
+  const queryClient = useQueryClient();
+
+  const { data: schedules = [], isFetching, refetch } = useQuery({
     queryKey: ["medications", familyId, memberId],
     queryFn: () => MedicationAPI.getSchedules(familyId!, memberId!),
     enabled: !!familyId && !!memberId,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (scheduleId: string) => MedicationAPI.deleteSchedule(familyId!, memberId!, scheduleId),
+    onSuccess: () => {
+      Alert.alert("Thành công", "Đã xóa lịch uống thuốc.");
+      refetch();
+    },
+    onError: (error: any) => {
+      Alert.alert("Lỗi", error.response?.data?.message || "Không thể xóa lịch thuốc.");
+    }
+  });
+
+  const renewMutation = useMutation({
+    mutationFn: ({ scheduleId, payload }: { scheduleId: string, payload: any }) => 
+      MedicationAPI.updateSchedule(familyId!, memberId!, scheduleId, payload),
+    onSuccess: () => {
+      Alert.alert("Thành công", "Đã gia hạn lịch uống thuốc.");
+      refetch();
+    },
+    onError: (error: any) => {
+      Alert.alert("Lỗi", error.response?.data?.message || "Không thể gia hạn lịch thuốc.");
+    }
+  });
+
+  const sortedSchedules = useMemo(() => {
+    const now = new Date();
+    return [...schedules].sort((a, b) => {
+      const isExpiredA = a.end_date ? new Date(a.end_date) < now : false;
+      const isExpiredB = b.end_date ? new Date(b.end_date) < now : false;
+      
+      if (isExpiredA && !isExpiredB) return 1;
+      if (!isExpiredA && isExpiredB) return -1;
+      return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+    });
+  }, [schedules]);
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "Xác nhận xóa",
+      "Bạn có chắc chắn muốn xóa lịch uống thuốc này không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        { text: "Xóa", style: "destructive", onPress: () => deleteMutation.mutate(id) }
+      ]
+    );
+  };
+
+  const handleRenew = (schedule: any) => {
+    const now = new Date();
+    const originalStart = new Date(schedule.start_date);
+    const originalEnd = schedule.end_date ? new Date(schedule.end_date) : null;
+    
+    let durationDays = 7;
+    if (originalEnd) {
+      const diffTime = Math.abs(originalEnd.getTime() - originalStart.getTime());
+      durationDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 7;
+    }
+
+    const newStart = new Date();
+    const newEnd = new Date();
+    newEnd.setDate(newStart.getDate() + durationDays);
+
+    Alert.alert(
+      "Gia hạn lịch thuốc",
+      `Bạn có muốn gia hạn lịch thuốc này thêm ${durationDays} ngày (từ hôm nay đến ${newEnd.toLocaleDateString("vi-VN")}) không?`,
+      [
+        { text: "Hủy", style: "cancel" },
+        { 
+          text: "Gia hạn ngay", 
+          onPress: () => renewMutation.mutate({ 
+            scheduleId: schedule._id, 
+            payload: { 
+              start_date: newStart.toISOString(), 
+              end_date: newEnd.toISOString() 
+            } 
+          }) 
+        }
+      ]
+    );
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -50,7 +148,7 @@ export default function MedicationsListPage() {
         <TouchableOpacity
           style={[styles.actionBtn, styles.addBtn]}
           onPress={() => {
-            noteInDevelopment();
+            router.navigate("/protected/medications/manual");
           }}
         >
           <Plus color="#2C5EDB" size={24} />
@@ -72,35 +170,71 @@ export default function MedicationsListPage() {
           defaultValue={memberId}
           placeholderText="Chọn người thân xem lịch"
           onChange={(i: any) => setMemberId(i.value)}
+          disable={!isOwner}
         />
       </View>
 
       {isFetching ? (
         <ActivityIndicator size="large" color="#2C5EDB" style={{ marginTop: 40 }} />
-      ) : schedules.length > 0 ? (
+      ) : sortedSchedules.length > 0 ? (
         <View style={styles.scheduleList}>
-          {schedules.map((schedule) => (
-            <View key={schedule._id} style={styles.scheduleCard}>
-              <Text style={styles.dateRange}>
-                Từ: {new Date(schedule.start_date).toLocaleDateString("vi-VN")}
-                {schedule.end_date ? ` - Đến: ${new Date(schedule.end_date).toLocaleDateString("vi-VN")}` : ""}
-              </Text>
-
-              <View style={styles.sessionBox}>
-                <Clock size={14} color="#6B7280" />
-                <Text style={styles.sessionText}>Giờ nhắc: {schedule.session_times.join(", ")}</Text>
-              </View>
-
-              {schedule.medications.map((med, idx) => (
-                <View key={idx} style={styles.medItem}>
-                  <Text style={styles.medName}>• {med.name}</Text>
-                  <Text style={styles.medSub}>
-                    Liều: {med.dosage} | Ngày: {med.days} | {med.frequency}
+          {sortedSchedules.map((schedule) => {
+            const isExpired = schedule.end_date ? new Date(schedule.end_date) < new Date() : false;
+            
+            return (
+              <View key={schedule._id} style={[styles.scheduleCard, isExpired && styles.expiredCard]}>
+                <View style={styles.cardHeader}>
+                  <Text style={[styles.dateRange, isExpired && styles.expiredText]}>
+                    Từ: {new Date(schedule.start_date).toLocaleDateString("vi-VN")}
+                    {schedule.end_date ? ` - Đến: ${new Date(schedule.end_date).toLocaleDateString("vi-VN")}` : ""}
                   </Text>
+                  {isExpired && (
+                    <View style={styles.expiredBadge}>
+                      <AlertCircle size={12} color="#EF4444" />
+                      <Text style={styles.expiredBadgeText}>Đã hết hạn</Text>
+                    </View>
+                  )}
                 </View>
-              ))}
-            </View>
-          ))}
+
+                <View style={styles.sessionBox}>
+                  <Clock size={14} color="#6B7280" />
+                  <Text style={styles.sessionText}>Giờ nhắc: {schedule.session_times.join(", ")}</Text>
+                </View>
+
+                {schedule.medications.map((med, idx) => (
+                  <View key={idx} style={styles.medItem}>
+                    <Text style={styles.medName}>• {med.name}</Text>
+                    <Text style={styles.medSub}>
+                      Liều: {med.dosage} | Ngày: {med.days} | {med.frequency}
+                    </Text>
+                  </View>
+                ))}
+
+                {isOwner && (
+                  <View style={styles.cardActions}>
+                    <TouchableOpacity 
+                      style={styles.deleteBtn} 
+                      onPress={() => handleDelete(schedule._id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 size={20} color="#EF4444" />
+                    </TouchableOpacity>
+                    
+                    {isExpired && (
+                      <TouchableOpacity 
+                        style={styles.renewBtn} 
+                        onPress={() => handleRenew(schedule)}
+                        disabled={renewMutation.isPending}
+                      >
+                        <RotateCw size={18} color="#2C5EDB" />
+                        <Text style={styles.renewBtnText}>Gia hạn</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+              </View>
+            );
+          })}
         </View>
       ) : (
         <View style={styles.emptyState}>
@@ -229,5 +363,62 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     marginLeft: 10,
     marginTop: 2,
+  },
+  expiredCard: {
+    backgroundColor: "#F9FAFB",
+    borderColor: "#E5E7EB",
+    opacity: 0.8,
+  },
+  expiredText: {
+    color: "#6B7280",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  expiredBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    gap: 4,
+  },
+  expiredBadgeText: {
+    fontSize: 10,
+    color: "#EF4444",
+    fontWeight: "700",
+  },
+  cardActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    gap: 16,
+  },
+  deleteBtn: {
+    padding: 8,
+    backgroundColor: "#FEF2F2",
+    borderRadius: 8,
+  },
+  renewBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EEF2FF",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  renewBtnText: {
+    fontSize: 14,
+    color: "#2C5EDB",
+    fontWeight: "600",
   },
 });

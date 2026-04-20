@@ -77,6 +77,14 @@ class CMedicationAPI {
     const response = await apiClient.get(`/family/${familyId}/members/${memberId}/medications`);
     return response.data?.data?.schedules || [];
   }
+  
+  async deleteSchedule(familyId: string, memberId: string, scheduleId: string): Promise<void> {
+    await apiClient.delete(`/family/${familyId}/members/${memberId}/medications/${scheduleId}`);
+  }
+
+  async updateSchedule(familyId: string, memberId: string, scheduleId: string, payload: Partial<MedicationSchedulePayload>): Promise<void> {
+    await apiClient.patch(`/family/${familyId}/members/${memberId}/medications/${scheduleId}`, payload);
+  }
 }
 
 export const MedicationAPI = new CMedicationAPI();
