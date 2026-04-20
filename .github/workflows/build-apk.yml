@@ -31,7 +31,9 @@ jobs:
           java-version: '17'
 
       - name: 4. Install dependencies
-        run: npm install
+        run: |
+          rm -f package-lock.json
+          npm install
 
       - name: 5. Build APK locally on Github Server
         run: eas build -p android --profile preview --local --non-interactive --output=app-release.apk
