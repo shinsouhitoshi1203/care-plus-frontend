@@ -51,3 +51,4 @@ export const AccountAPI = {
     }
   },
 };
+export type AccountProps = Awaited<ReturnType<typeof AccountAPI.getAccount>>;

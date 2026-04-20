@@ -68,7 +68,7 @@ function User() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header Profile Info */}
-      <Pressable onPress={() => router.push("/protected/userDetails/index")} style={styles.headerCard}>
+      <Pressable onPress={() => router.push("/protected/userDetails")} style={styles.headerCard}>
         <Avatar
           size={80}
           rounded
