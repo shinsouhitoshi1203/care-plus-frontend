@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "760712934532",
+    "project_id": "care-plus-aab78",
+    "storage_bucket": "care-plus-aab78.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:760712934532:android:305a98f6ab8532d3fcfed1",
+        "android_client_info": {
+          "package_name": "com.ayatollah72.careplus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHoiI9jGECBFyQUFZIz9lCX6IrPopW6_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
