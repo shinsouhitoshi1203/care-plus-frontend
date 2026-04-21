@@ -45,29 +45,88 @@ Toàn bộ logic và giao diện của ứng dụng được đặt trong thư m
 ```text
 care-plus-frontend/
 ├── android/                 # Mã nguồn tự sinh cho nền tảng Android (Native)
-├── ios/                     # Mã nguồn tự sinh cho nền tảng iOS (Native)
 ├── private/                 # Thư mục chứa các file bảo mật (google-services.json...)
-├── assets/                  # Hình ảnh, fonts, và tài nguyên tĩnh
-└── src/                     # Cốt lõi của ứng dụng React Native
-    ├── api/                 # Cấu hình Axios, các hàm gọi API (interceptor, fetchers)
-    ├── app/                 # Màn hình (Screens) và định tuyến (Routing bằng Expo Router)
-    │   ├── (auth)/          # Nhóm route liên quan đến xác thực
-    │   ├── protected/       # Các route cần đăng nhập mới vào được
-    │   └── _layout.tsx      # Layout chính (cấu hình Providers, Header)
-    ├── components/          # Các UI components dùng chung (Buttons, Inputs, Cards...)
-    ├── config/              # Cấu hình môi trường (Firebase, Constants...)
-    ├── features/            # Chức năng chính, được chia nhỏ theo Domain
-    │   ├── auth/            # Tính năng xác thực
-    │   ├── family/          # Tính năng quản lý gia đình
-    │   ├── home/            # Giao diện trang chủ dashboard
-    │   ├── medication/      # Quản lý đơn thuốc
-    │   ├── record/          # Hồ sơ y tế
-    │   └── sos/             # Tính năng gọi khẩn cấp
-    ├── hocs/                # Higher-Order Components
-    ├── hooks/               # Các custom React Hooks dùng lại (Ví dụ: useAuth, useTheme)
-    ├── layouts/             # Cấu trúc bố cục dùng lại cho các màn hình
-    ├── stores/              # Zustand global stores
-    └── utils/               # Các hàm tiện ích, formatters, helpers
+├── release/                 # Thư mục phục vụ đóng gói/phát hành
+├── src/                     # Cốt lõi của ứng dụng React Native
+│   ├── api/                 # Cấu hình API, hàm gọi API
+│   │   └── index.ts         # Entry point cho API chung
+│   │
+│   ├── app/                 # Màn hình (Screens) và định tuyến (Routing bằng Expo Router)
+│   │   ├── (auth)/          # Nhóm route liên quan đến xác thực
+│   │   ├── protected/       # Các route cần đăng nhập mới vào được
+│   │   ├── index.tsx        # Màn hình khởi đầu
+│   │   ├── _auth.tsx        # Entry/flow xử lý xác thực
+│   │   └── _layout.tsx      # Layout chính (cấu hình Providers, Header)
+│   │
+│   ├── assets/              # Hình ảnh, fonts, và tài nguyên tĩnh
+│   │
+│   ├── components/          # Các UI components dùng chung
+│   │   ├── ButtonList/      # Danh sách buttons
+│   │   ├── buttons/         # Các button components
+│   │   ├── dialogs/         # Dialog/Modal components
+│   │   ├── input/           # Input field components
+│   │   ├── Loading/         # Loading indicator
+│   │   ├── message/         # Message/Toast components
+│   │   ├── QR/              # QR code components
+│   │   ├── SOS/             # SOS components
+│   │   └── UserAvatar/      # User avatar component
+│   │
+│   ├── config/              # Cấu hình môi trường
+│   │   ├── axios/           # Cấu hình Axios (interceptors, request/response)
+│   │   ├── env/             # Biến môi trường
+│   │   └── routing/         # Cấu hình routing
+│   │
+│   ├── features/            # Chức năng chính, được chia nhỏ theo Domain
+│   │   ├── account/         # Quản lý tài khoản
+│   │   ├── auth/            # Xác thực người dùng
+│   │   ├── family/          # Quản lý gia đình
+│   │   ├── home/            # Trang chủ
+│   │   ├── medication/      # Quản lý thuốc
+│   │   ├── quickLogin/      # Đăng nhập nhanh
+│   │   ├── record/          # Hồ sơ y tế
+│   │   ├── sos/             # Tính năng khẩn cấp
+│   │   ├── user/            # Thông tin người dùng
+│   │   └── welcome/         # Màn hình chào mừng
+│   │
+│   ├── hocs/                # Higher-Order Components
+│   │
+│   ├── hooks/               # Các custom React Hooks dùng lại
+│   │   ├── useAuth.tsx      # Hook xác thực
+│   │   ├── usePushNotifications.ts  # Hook quản lý push notifications
+│   │   ├── useReset.tsx     # Hook reset trạng thái
+│   │   ├── useSubPageTitle.tsx      # Hook quản lý tiêu đề trang con
+│   │   └── useWait.tsx      # Hook delay/wait
+│   │
+│   ├── layouts/             # Cấu trúc bố cục dùng lại cho các màn hình
+│   │
+│   ├── stores/              # Global state management
+│   │   ├── zustand/         # Zustand stores (client state)
+│   │   │   └── index.ts
+│   │   ├── tanstack/        # TanStack React Query config
+│   │   │   ├── config.ts    # Query client configuration
+│   │   │   ├── index.ts
+│   │   │   └── readme.md
+│   │   ├── secureStore/     # Secure storage (sensitive data)
+│   │   │   └── index.ts
+│   │   ├── useSOSStore.ts   # SOS state store
+│   │   └── readme.md
+│   │
+│   ├── utils/               # Các hàm tiện ích, formatters, helpers
+│   │
+│   ├── global.css           # Styles toàn cục
+│   └── readme.md            # README cho thư mục src
+│
+├── app.json                 # Cấu hình Expo app
+├── package.json             # Dependencies và scripts
+├── tsconfig.json            # TypeScript configuration
+├── tailwind.config.js       # Tailwind CSS configuration
+├── nativewind-env.d.ts      # NativeWind type definitions
+├── metro.config.js          # Metro bundler configuration
+├── babel.config.js          # Babel configuration
+├── eslint.config.js         # ESLint configuration
+├── eas.json                 # EAS (Expo Application Services) configuration
+├── FE_SETUP_GUIDE.md        # Hướng dẫn cài đặt chi tiết
+└── README.md                # File README chính
 ```
 
 ---
