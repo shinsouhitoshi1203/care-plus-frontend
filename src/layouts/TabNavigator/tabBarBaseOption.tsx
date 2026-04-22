@@ -1,6 +1,6 @@
 export const tabBarBaseOptions = {
-  tabBarActiveTintColor: "tomato",
-  tabBarInactiveTintColor: "gray",
+  tabBarActiveTintColor: "#0B5FFF",
+  tabBarInactiveTintColor: "#64748B",
   headerShown: false,
   contentStyle: { backgroundColor: "white" },
 };

@@ -1,23 +1,28 @@
-import IconTextButton from "@/components/buttons/IconTextButton";
 import { SOSButton } from "@/components/SOS/SOSButton";
+import { SafeAreaContent } from "@/layouts/TabNavigator";
+import { Button } from "@rneui/themed";
 import { useRouter } from "expo-router";
 import { HeartPulse } from "lucide-react-native";
-import { Info, Pill, ScanLine } from "lucide-react-native/icons";
+import { Pill, ScanLine } from "lucide-react-native/icons";
 import { useMemo } from "react";
 
-import { ScrollView, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+
+const styles = StyleSheet.create({
+  quickActionContainer: {
+    padding: 12,
+    // height: 200,
+    backgroundColor: "#f0f0f0",
+    borderColor: "#ccc",
+    borderWidth: 2,
+    borderRadius: 20,
+  },
+});
+
 export default function HomePage() {
   const router = useRouter();
   const quickActions = useMemo(
     () => [
-      {
-        id: "enter-record",
-        title: "Theo dõi sức khỏe",
-        icon: HeartPulse,
-        bg: "blue",
-        iconPosition: "top",
-        onPress: () => router.navigate("/protected/records"),
-      },
       {
         id: "medicine-schedule",
         title: "Lịch uống thuốc",
@@ -27,6 +32,15 @@ export default function HomePage() {
         onPress: () => router.navigate("/protected/medications"),
       },
       {
+        id: "enter-record",
+        title: "Theo dõi sức khỏe",
+        icon: HeartPulse,
+        bg: "#008000",
+        iconPosition: "top",
+        onPress: () => router.navigate("/protected/records"),
+      },
+
+      {
         id: "scan-prescription",
         title: "Quét toa thuốc",
         icon: ScanLine,
@@ -34,38 +48,49 @@ export default function HomePage() {
         iconPosition: "top",
         onPress: () => router.navigate("/protected/medications/scan"),
       },
-      {
-        id: "usage-guide",
-        title: "Hướng dẫn sử dụng",
-        icon: Info,
-        bg: "#04409f",
-        iconPosition: "top",
-        onPress: () => router.navigate("/protected/userDetails/guide"),
-      },
     ],
     [router]
   );
   return (
-    <ScrollView className="bg-white">
+    <ScrollView className="bg-white gap-8" style={{ paddingHorizontal: 24 }}>
       {/* <QuickComponent /> */}
-
       {/* Nút SOS Khẩn cấp */}
       <View className="py-10">
         <SOSButton />
       </View>
-
-      <View className="flex-1 flex" style={{ paddingHorizontal: 24 }}>
-        <View className="rounded-[28px] mb-6">
-          <View className="flex flex-row flex-wrap gap-3">
-            {quickActions.map(({ id, ...action }) => (
-              <View style={{ height: 150, minWidth: 150 }} key={id} className="flex-1 ">
-                <IconTextButton key={id} {...action} />
+      <View className="flex-1 flex" style={styles.quickActionContainer}>
+        <Text className="text-lg font-bold" style={{ marginBottom: 12 }}>
+          Truy cập nhanh
+        </Text>
+        <View style={{ gap: 12 }}>
+          {quickActions.map(({ id, iconPosition, icon, ...action }) => {
+            const IconComponent = icon ?? null;
+            return (
+              <View style={{ height: 80, width: "100%" }} key={id}>
+                <Button
+                  type="solid"
+                  icon={IconComponent ? <IconComponent size={24} color="white" /> : undefined}
+                  iconPosition="left"
+                  buttonStyle={{
+                    justifyContent: "flex-start",
+                    gap: 12,
+                    backgroundColor: action.bg + "a0",
+                    height: "100%",
+                    borderRadius: 16,
+                    borderColor: action.bg,
+                    borderWidth: 2,
+                    paddingHorizontal: 24,
+                  }}
+                  titleStyle={{ color: "white", fontSize: 18, fontWeight: "900" }}
+                  key={id}
+                  {...action}
+                />
               </View>
-            ))}
-          </View>
+            );
+          })}
         </View>
-        {/* <OverviewHealthRecordChart /> */}
       </View>
+      <SafeAreaContent />
     </ScrollView>
   );
 }

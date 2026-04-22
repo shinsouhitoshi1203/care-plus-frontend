@@ -1,6 +1,7 @@
 import ButtonList from "@/components/ButtonList";
 import useLogout from "@/features/user/hooks/useLogout";
 import useAuth from "@/hooks/useAuth";
+import { SafeAreaContent } from "@/layouts/TabNavigator";
 import { Avatar } from "@rneui/themed";
 import { useRouter } from "expo-router";
 import { BellRing, CircleHelp, Info, LogOutIcon, ShieldCheck, SmartphoneNfc } from "lucide-react-native";
@@ -97,6 +98,7 @@ function User() {
 
       {/* Settings List */}
       <ButtonList data={UserControlList} />
+      <SafeAreaContent />
     </ScrollView>
   );
 }

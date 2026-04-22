@@ -1,9 +1,9 @@
-import { Clock4Icon, HomeIcon, HousePlusIcon, UserIcon } from "lucide-react-native";
+import { Clock4Icon, HomeIcon, LayoutGrid, UserIcon } from "lucide-react-native";
 
 const lucideIconMap: Record<string, React.ComponentType<{ color: string; size: number }>> = {
-  home: HomeIcon,
+  home: LayoutGrid,
   index: HomeIcon,
-  family: HousePlusIcon,
+  family: HomeIcon,
   user: UserIcon,
   reminder: Clock4Icon,
 };
