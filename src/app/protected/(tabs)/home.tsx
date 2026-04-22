@@ -101,7 +101,7 @@ export default function HomePage() {
         sub: "Thông tin và hướng dẫn khi có tình huống khẩn cấp",
         bg: "#FF0000",
         onPress: () => {
-          // router.navigate("/protected/");
+          router.navigate("/protected/userDetails/emergency");
         },
       },
       {

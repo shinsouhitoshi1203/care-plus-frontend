@@ -19,7 +19,7 @@ export default function usePublicURL() {
         qrURL: `${env.baseWEB}/emergency/?id=${id}`,
       };
     },
-    staleTime: 24 * 60 * 1000, // 24 hours
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
   return {
     ...data,

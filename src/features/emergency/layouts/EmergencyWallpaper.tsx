@@ -56,7 +56,7 @@ export default function EmergencyWallpaper() {
     <>
       <View className="mt-3" style={{ height: 56 }}>
         <IconTextButton
-          title={isSaving ? "Đang lưu ảnh..." : "Lưu ảnh màn hình khóa"}
+          title={isSaving ? "Đang lưu ảnh..." : "Lưu số làm hình nền"}
           icon={Download}
           bg="success"
           css={{ borderRadius: 14, borderWidth: 1, borderColor: "#0F766E" }}

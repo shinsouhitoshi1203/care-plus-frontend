@@ -27,7 +27,7 @@ function FinishPage() {
   const router = useRouter();
   const beginHandler = () => {
     if (router.canDismiss()) router.dismissAll();
-    router.replace("/protected/home");
+    router.replace("/protected/(tabs)/home");
   };
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
