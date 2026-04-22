@@ -12,7 +12,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 18,
   },
-
   greeting: {
     color: "#fff",
     fontSize: 15,
@@ -23,12 +22,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "800",
     marginTop: 2,
-  },
-
-  qrContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 8,
   },
 });
 

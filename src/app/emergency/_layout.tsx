@@ -1,7 +1,8 @@
 "use client";
 
+import PlatformCheckLayout from "@/layouts/PlatformCheck";
 import { Stack } from "expo-router";
-import { Platform, View, Text, StyleSheet } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 export default function WebEmergencyLayout() {
   const isWeb = Platform.OS === "web";
@@ -16,12 +17,14 @@ export default function WebEmergencyLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: "#F9FAFB" },
-      }}
-    />
+    <PlatformCheckLayout exclude="native">
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: "#F9FAFB" },
+        }}
+      />
+    </PlatformCheckLayout>
   );
 }
 

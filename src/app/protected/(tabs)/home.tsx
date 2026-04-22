@@ -1,9 +1,10 @@
+import ButtonList from "@/components/ButtonList";
 import { SOSButton } from "@/components/SOS/SOSButton";
-import QuickComponent from "@/features/home/components/Quick";
+import GreetingComponent from "@/features/home/components/Greeting";
 import { SafeAreaContent } from "@/layouts/TabNavigator";
 import { Button } from "@rneui/themed";
 import { useRouter } from "expo-router";
-import { HeartPulse } from "lucide-react-native";
+import { HeartPulse, InfoIcon, Siren } from "lucide-react-native";
 import { Pill, ScanLine } from "lucide-react-native/icons";
 import { useMemo } from "react";
 
@@ -39,6 +40,26 @@ const styles = StyleSheet.create({
   quickActionList: {
     gap: 12,
   },
+
+  otherFeatureCard: {
+    flex: 1,
+    minWidth: 120,
+    height: 100,
+    borderWidth: 1,
+    borderColor: "#00f",
+    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    padding: 10,
+    gap: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  otherFeatureTitle: {
+    color: "#00f",
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 14,
+  },
 });
 
 export default function HomePage() {
@@ -70,10 +91,37 @@ export default function HomePage() {
     ],
     [router]
   );
+
+  const otherFeatures = useMemo(
+    () => [
+      {
+        id: "emergency",
+        title: "Thông tin khẩn cấp",
+        icon: Siren,
+        sub: "Thông tin và hướng dẫn khi có tình huống khẩn cấp",
+        bg: "#FF0000",
+        onPress: () => {
+          router.navigate("/protected/emergency");
+        },
+      },
+      {
+        id: "guide-support",
+        title: "Hướng dẫn sử dụng",
+        sub: "Xem hướng dẫn chi tiết về cách sử dụng ứng dụng",
+        icon: InfoIcon,
+        bg: "#0000FF",
+        onPress: () => {
+          router.navigate("/protected/userDetails/guide");
+        },
+      },
+    ],
+    [router]
+  );
+
   return (
     <ScrollView className="bg-white" contentContainerStyle={styles.contentContainer}>
       <View style={styles.quickSection}>
-        <QuickComponent />
+        <GreetingComponent />
         <View style={styles.sosOverlapContainer}>
           <SOSButton />
         </View>
@@ -109,6 +157,9 @@ export default function HomePage() {
           })}
         </View>
       </View>
+
+      <ButtonList data={otherFeatures as any} />
+
       <SafeAreaContent />
     </ScrollView>
   );

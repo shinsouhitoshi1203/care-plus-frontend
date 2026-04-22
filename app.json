@@ -56,7 +56,7 @@
         "expo-secure-store",
         {
           "configureAndroidBackup": true,
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+          "faceIDPermission": "Cho phép Care+ truy cập dữ liệu sinh trắc học Face ID của bạn."
         }
       ],
       [
@@ -76,7 +76,15 @@
           "isAndroidBackgroundLocationEnabled": true
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Vui lòng cho phép Care+ truy cập thư viện ảnh của bạn để chọn ảnh khi cần thiết.",
+          "savePhotosPermission": "Cho phép Care+ lưu hình ảnh vào thư viện ảnh của bạn.",
+          "isStandardFullAccessPhotoLibrary": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
@@ -88,6 +96,6 @@
         "projectId": "5e14d0f8-16ec-420e-84d9-21c99e6f4fa2"
       }
     },
-    "owner": "jack1e123"
+    "owner": "shinsouhitoshi1203"
   }
 }
