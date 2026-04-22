@@ -1,39 +1,22 @@
 import QR from "@/components/QR";
-import { AccountAPI } from "@/features/account/api";
-import { useQuery } from "@tanstack/react-query";
-import { createContext } from "react";
-import { View } from "react-native";
-import WelcomeComponent from "./Welcome";
-import BigHelpButton from "./buttons/BigHelp";
-export const QuickComponentContext = createContext({
-  fullName: "",
-  qr_code_url: "",
-});
-function QuickComponent() {
-  const { data } = useQuery({
-    queryKey: ["user.info"],
-    queryFn: async () => {
-      return await AccountAPI.getAccount();
-    },
-    select: (user) => {
-      const URL_BASE = "https://care-plus-backend-production.up.railway.app";
-      const qr_code_url = `${URL_BASE}/user/${user.id}/qr-code`;
-      return {
-        fullName: user.full_name,
-        qr_code_url: qr_code_url,
-      };
-    },
-  });
+import { Text, View } from "react-native";
+import styles from "./Quick.styles";
+
+export default function QuickComponent() {
   return (
-    // <QuickComponentContext.Provider value={data}>
-    <View className="flex gap-4 px-8 py-4 rounded-tl-xl rounded-tr-xl bg-blue-100 ">
-      <View className={`w-full flex-row justify-between gap-2 items-center `}>
-        <WelcomeComponent />
-        <QR size={64} url={data?.qr_code_url} />
+    <View style={styles.container}>
+      <View className="flex-row items-start justify-between gap-3">
+        <View className="flex-1">
+          <Text style={styles.greeting}>Xin chào,</Text>
+          <Text style={styles.name} numberOfLines={1}>
+            Nguyễn Minh Khang
+          </Text>
+        </View>
+
+        <View style={styles.qrContainer}>
+          <QR url="https://google.com" />
+        </View>
       </View>
-      <BigHelpButton />
     </View>
-    // </QuickComponentContext.Provider>
   );
 }
-export default QuickComponent;

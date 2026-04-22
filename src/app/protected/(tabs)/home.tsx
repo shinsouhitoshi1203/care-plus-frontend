@@ -1,4 +1,5 @@
 import { SOSButton } from "@/components/SOS/SOSButton";
+import QuickComponent from "@/features/home/components/Quick";
 import { SafeAreaContent } from "@/layouts/TabNavigator";
 import { Button } from "@rneui/themed";
 import { useRouter } from "expo-router";
@@ -9,13 +10,34 @@ import { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 4,
+  },
+  quickSection: {
+    position: "relative",
+  },
+  sosOverlapContainer: {
+    alignItems: "center",
+    marginBottom: 12,
+    marginTop: -100,
+    zIndex: 20,
+  },
   quickActionContainer: {
-    padding: 12,
-    // height: 200,
-    backgroundColor: "#f0f0f0",
-    borderColor: "#ccc",
+    backgroundColor: "#F1F5F9",
+    borderColor: "#D1D5DB",
     borderWidth: 2,
-    borderRadius: 20,
+    borderRadius: 24,
+    padding: 14,
+  },
+  quickActionTitle: {
+    color: "#0F172A",
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 14,
+  },
+  quickActionList: {
+    gap: 12,
   },
 });
 
@@ -28,7 +50,6 @@ export default function HomePage() {
         title: "Lịch uống thuốc",
         icon: Pill,
         bg: "#424601",
-        iconPosition: "top",
         onPress: () => router.navigate("/protected/medications"),
       },
       {
@@ -36,7 +57,6 @@ export default function HomePage() {
         title: "Theo dõi sức khỏe",
         icon: HeartPulse,
         bg: "#008000",
-        iconPosition: "top",
         onPress: () => router.navigate("/protected/records"),
       },
 
@@ -45,25 +65,24 @@ export default function HomePage() {
         title: "Quét toa thuốc",
         icon: ScanLine,
         bg: "#FFA500",
-        iconPosition: "top",
         onPress: () => router.navigate("/protected/medications/scan"),
       },
     ],
     [router]
   );
   return (
-    <ScrollView className="bg-white gap-8" style={{ paddingHorizontal: 24 }}>
-      {/* <QuickComponent /> */}
-      {/* Nút SOS Khẩn cấp */}
-      <View className="py-10">
-        <SOSButton />
+    <ScrollView className="bg-white" contentContainerStyle={styles.contentContainer}>
+      <View style={styles.quickSection}>
+        <QuickComponent />
+        <View style={styles.sosOverlapContainer}>
+          <SOSButton />
+        </View>
       </View>
+
       <View className="flex-1 flex" style={styles.quickActionContainer}>
-        <Text className="text-lg font-bold" style={{ marginBottom: 12 }}>
-          Truy cập nhanh
-        </Text>
-        <View style={{ gap: 12 }}>
-          {quickActions.map(({ id, iconPosition, icon, ...action }) => {
+        <Text style={styles.quickActionTitle}>Truy cập nhanh</Text>
+        <View style={styles.quickActionList}>
+          {quickActions.map(({ id, icon, ...action }) => {
             const IconComponent = icon ?? null;
             return (
               <View style={{ height: 80, width: "100%" }} key={id}>
