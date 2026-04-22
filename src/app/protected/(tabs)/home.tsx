@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   quickActionContainer: {
     backgroundColor: "#F1F5F9",
     borderColor: "#D1D5DB",
-    borderWidth: 2,
+    borderWidth: 1,
     borderRadius: 24,
     padding: 14,
   },
@@ -101,7 +101,7 @@ export default function HomePage() {
         sub: "Thông tin và hướng dẫn khi có tình huống khẩn cấp",
         bg: "#FF0000",
         onPress: () => {
-          router.navigate("/protected/emergency");
+          // router.navigate("/protected/");
         },
       },
       {
@@ -157,9 +157,10 @@ export default function HomePage() {
           })}
         </View>
       </View>
-
-      <ButtonList data={otherFeatures as any} />
-
+      <View className="flex-1 flex my-8">
+        <Text className="mb-5">Các tính năng khác</Text>
+        <ButtonList data={otherFeatures as any} />
+      </View>
       <SafeAreaContent />
     </ScrollView>
   );

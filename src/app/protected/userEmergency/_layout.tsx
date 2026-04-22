@@ -1,11 +1,11 @@
 import { stackOptions } from "@/config/routing";
-import SubPageHeader from "@/layouts/SubPageHeader";
 import { Stack } from "expo-router";
 
-export default function EmergencyLayout() {
+export default function UserEmergencyLayout() {
+  console.log("SUCKER");
+
   return (
     <>
-      <SubPageHeader />
       <Stack screenOptions={stackOptions} />
     </>
   );
