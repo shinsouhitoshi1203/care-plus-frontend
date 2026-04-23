@@ -52,10 +52,7 @@ care-plus-frontend/
 │   │   └── index.ts         # Entry point cho API chung
 │   │
 │   ├── app/                 # Màn hình (Screens) và định tuyến (Routing bằng Expo Router)
-│   │   ├── (auth)/          # Nhóm route liên quan đến xác thực
-│   │   ├── protected/       # Các route cần đăng nhập mới vào được
-│   │   ├── index.tsx        # Màn hình khởi đầu
-│   │   ├── _auth.tsx        # Entry/flow xử lý xác thực
+│   │   ├── .................................................................
 │   │   └── _layout.tsx      # Layout chính (cấu hình Providers, Header)
 │   │
 │   ├── assets/              # Hình ảnh, fonts, và tài nguyên tĩnh
@@ -81,7 +78,8 @@ care-plus-frontend/
 │   │   ├── auth/            # Xác thực người dùng
 │   │   ├── family/          # Quản lý gia đình
 │   │   ├── home/            # Trang chủ
-│   │   ├── medication/      # Quản lý thuốc
+│   │   ├── medication/      # Quản lý toa thuốc
+│   │   ├── medication/      # Quản lý toa thuốc
 │   │   ├── quickLogin/      # Đăng nhập nhanh
 │   │   ├── record/          # Hồ sơ y tế
 │   │   ├── sos/             # Tính năng khẩn cấp
@@ -149,7 +147,7 @@ Tài liệu trên bao gồm mọi thứ bạn cần:
 _Lưu ý: Bạn phải thiết lập đầy đủ môi trường theo [FE_SETUP_GUIDE.md](FE_SETUP_GUIDE.md) trước khi chạy các lệnh này._
 
 ```bash
-# 1. Cài đặt các gói Dependency (Chú ý cờ --legacy-peer-deps rất quan trọng cho dự án này)
+# 1. Cài đặt các gói Dependency
 npm install --legacy-peer-deps
 
 # 2. Khởi chạy Metro Bundler của Expo
@@ -164,14 +162,13 @@ npm run start
 
 - `npm start`: Chạy Expo Development server.
 - `npm run start-f`: Chạy `expo start -c` (Xóa cache của Metro, rất hữu ích khi thay đổi file cấu hình, tailwind hoặc env).
-- `npm run android`: Chạy / Build ứng dụng Native nội bộ cục bộ cho Android.
+- `npm run android`: Chạy / Build ứng dụng Native nội bộ cục bộ cho Android (Chạy USB debug trên điện thoại).
 - `npm run lint`: Chạy ESLint để quét lỗi cú pháp mã nguồn.
 
 ---
 
-## 🤝 Quy chuẩn Code (Coding Standards) & Đóng góp
+## 🤝 Cộng tác làm việc
 
 - Sử dụng **TypeScript** một cách nghiêm ngặt đối với mọi interfaces và models.
 - **Component**: Ưu tiên sử dụng Functional Components kết hợp Hooks.
-- **Styling**: Sử dụng các utility classes của Tailwind (thông qua `className`), tránh viết Inline Styles ngoài trừ khi cần tính toán dynamic dimensions.
 - **Git Flow**: Tạo một nhánh rẽ (branch) tính năng theo cấu trúc `feature/tên-chức-năng` trước khi gửi Pull Request (PR) về nhánh main.
