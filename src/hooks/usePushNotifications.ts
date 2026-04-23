@@ -4,7 +4,10 @@ import messaging from "@react-native-firebase/messaging";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect } from "react";
 import { Platform } from "react-native";
+// @ts-ignore
+globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
+// Cấu hình handler cho notifications khi app đang ở foreground
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,

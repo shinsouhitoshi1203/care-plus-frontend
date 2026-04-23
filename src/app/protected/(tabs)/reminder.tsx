@@ -1,4 +1,5 @@
 import ButtonList from "@/components/ButtonList";
+import { SafeAreaContent } from "@/layouts/TabNavigator";
 import { useRouter } from "expo-router";
 import { BellRing, BookOpenCheck, Pill, ScanLine } from "lucide-react-native";
 import { useMemo } from "react";
@@ -61,6 +62,7 @@ function ReminderPage() {
       </View>
 
       <ButtonList data={reminderItems} />
+      <SafeAreaContent />
     </ScrollView>
   );
 }

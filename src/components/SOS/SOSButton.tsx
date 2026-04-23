@@ -45,29 +45,30 @@ export const SOSButton = () => {
   const triggerSOS = () => mutate();
 
   return (
-    <View className="items-center justify-center my-8">
-      {/* Lớp nền hiệu ứng nhấp nháy */}
-      <Animated.View
-        style={[
-          styles.pulseCircle,
-          {
-            transform: [{ scale: scaleAnim }],
-            opacity: opacityAnim,
-          },
-        ]}
-      />
+    <View className="items-center justify-center">
+      <View style={styles.frameCircle}>
+        <Animated.View
+          style={[
+            styles.pulseCircle,
+            {
+              transform: [{ scale: scaleAnim }],
+              opacity: opacityAnim,
+            },
+          ]}
+        />
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={handlePress}
-        className="w-32 h-32 bg-red-600 rounded-full items-center justify-center shadow-xl border-4 border-red-400"
-        style={{ elevation: 10 }}
-      >
-        <AlertCircle size={48} color="white" />
-        <Text className="text-white font-bold text-xl mt-1">SOS</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={handlePress}
+          className="w-32 h-32 bg-red-600 rounded-full items-center justify-center shadow-xl border-4 border-red-400"
+          style={{ elevation: 10 }}
+        >
+          <AlertCircle size={48} color="white" />
+          <Text className="text-white font-bold text-xl mt-1">SOS</Text>
+        </TouchableOpacity>
+      </View>
 
-      <Text className="text-gray-500 mt-8 text-center px-4 italic text-sm">
+      <Text className="text-gray-500 mt-6 text-center px-4 italic text-sm">
         Bấm để phát tín hiệu khẩn cấp tới gia đình
       </Text>
     </View>
@@ -75,12 +76,23 @@ export const SOSButton = () => {
 };
 
 const styles = StyleSheet.create({
+  frameCircle: {
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: "50%",
+    height: 180,
+    justifyContent: "center",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    width: 180,
+  },
   pulseCircle: {
     position: "absolute",
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    top: -10,
-    backgroundColor: "#dc2626",
+    width: 152,
+    height: 152,
+    borderRadius: 76,
+    backgroundColor: "#ef4444",
   },
 });

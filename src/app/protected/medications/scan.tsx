@@ -1,14 +1,25 @@
-import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert, ActivityIndicator, ScrollView, Linking } from "react-native";
-import { Camera, CameraType, CameraView, useCameraPermissions } from "expo-camera";
-import * as ImagePicker from "expo-image-picker";
-import { useIsFocused } from "@react-navigation/native";
-import { MedicationAPI, PrescriptionExtracted } from "@/features/medication/api";
-import { Camera as CameraIcon, Image as ImageIcon, RotateCcw, Upload, CheckCircle2, X } from "lucide-react-native";
-import { useRouter } from "expo-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import FamilyAPI from "@/features/family/api";
+import { MedicationAPI, PrescriptionExtracted } from "@/features/medication/api";
 import FullSizeDropdownComponent from "@/features/record/component/dropdown/variants/FullSize";
+import { useIsFocused } from "@react-navigation/native";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import { CheckCircle2, Image as ImageIcon, RotateCcw, Upload, X } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import DateTimePicker from "react-native-modal-datetime-picker";
 
 const SESSION_LABELS = ["Sáng", "Trưa", "Chiều", "Tối"];
@@ -21,7 +32,7 @@ function parseFrequencyToIndices(frequency?: string): number[] {
   if (lower.includes("trưa")) indices.push(1);
   if (lower.includes("chiều")) indices.push(2);
   if (lower.includes("tối")) indices.push(3);
-  
+
   if (indices.length === 0) {
     if (lower.includes("2 lần")) return [0, 3];
     if (lower.includes("3 lần")) return [0, 1, 3];
@@ -45,22 +56,22 @@ export default function ScanPrescriptionScreen() {
   const [memberId, setMemberId] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [sessionTimesGlobal, setSessionTimesGlobal] = useState<string[]>(['08:00', '12:00', '16:00', '20:00']);
+  const [sessionTimesGlobal, setSessionTimesGlobal] = useState<string[]>(["08:00", "12:00", "16:00", "20:00"]);
 
   // State phục vụ việc chọn giờ
   const [isTimePickerVisible, setTimePickerVisible] = useState(false);
-  const [pickingTarget, setPickingTarget] = useState<{ medIndex?: number, sessionIndex: number } | null>(null);
+  const [pickingTarget, setPickingTarget] = useState<{ medIndex?: number; sessionIndex: number } | null>(null);
 
   const { data: families = [] } = useQuery({ queryKey: ["families"], queryFn: FamilyAPI.getFamilies });
   const { data: members = [] } = useQuery({
     queryKey: ["family-members", familyId],
     queryFn: () => FamilyAPI.getMembers(familyId as string),
-    enabled: !!familyId
+    enabled: !!familyId,
   });
 
   useEffect(() => {
     if (families.length > 0 && !familyId) setFamilyId(families[0].family_id);
-  }, [families]);
+  }, [families, familyId]);
 
   const createMutation = useMutation({
     mutationFn: (payload: any) => MedicationAPI.createSchedule(familyId!, memberId!, payload),
@@ -70,7 +81,7 @@ export default function ScanPrescriptionScreen() {
     },
     onError: (error: any) => {
       Alert.alert("Lỗi", error.response?.data?.message || "Không thể lưu lịch thuốc");
-    }
+    },
   });
 
   const handleRequestPermissions = async () => {
@@ -91,7 +102,7 @@ export default function ScanPrescriptionScreen() {
             "Bạn đã từ chối quyền truy cập. Vui lòng vào Cài đặt để cấp quyền Camera và Thư viện ảnh cho ứng dụng.",
             [
               { text: "Để sau", style: "cancel" },
-              { text: "Mở Cài đặt", onPress: () => Linking.openSettings() }
+              { text: "Mở Cài đặt", onPress: () => Linking.openSettings() },
             ]
           );
         }
@@ -103,7 +114,7 @@ export default function ScanPrescriptionScreen() {
 
   useEffect(() => {
     // Chỉ tự động hỏi nếu trạng thái là undetermined hoặc chưa có permission object
-    if (permission && permission.status === 'undetermined') {
+    if (permission && permission.status === "undetermined") {
       handleRequestPermissions();
     }
   }, [permission]);
@@ -116,31 +127,37 @@ export default function ScanPrescriptionScreen() {
     );
   }
 
-
   // Fallback UI nếu không có quyền để tránh treo màn hình đen
-  if (!permission.granted && permission.status !== 'undetermined') {
+  if (!permission.granted && permission.status !== "undetermined") {
     return (
-      <View style={[styles.container, { backgroundColor: '#fff', padding: 24, alignItems: 'center', justifyContent: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: "#fff", padding: 24, alignItems: "center", justifyContent: "center" },
+        ]}
+      >
         <X color="#ef4444" size={64} />
-        <Text style={[styles.resultTitle, { textAlign: 'center', marginBottom: 12 }]}>Không có quyền truy cập</Text>
-        <Text style={[styles.medDetail, { textAlign: 'center', marginBottom: 32 }]}>
+        <Text style={[styles.resultTitle, { textAlign: "center", marginBottom: 12 }]}>Không có quyền truy cập</Text>
+        <Text style={[styles.medDetail, { textAlign: "center", marginBottom: 32 }]}>
           Chúng tôi cần quyền Camera để bạn có thể quét toa thuốc trực tiếp.
         </Text>
 
-        <TouchableOpacity style={[styles.primaryBtn, { width: '100%', marginBottom: 12 }]} onPress={handleRequestPermissions}>
+        <TouchableOpacity
+          style={[styles.primaryBtn, { width: "100%", marginBottom: 12 }]}
+          onPress={handleRequestPermissions}
+        >
           <Text style={styles.primaryBtnText}>Yêu cầu lại</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.secondaryBtn, { width: '100%' }]} onPress={() => router.back()}>
+        <TouchableOpacity style={[styles.secondaryBtn, { width: "100%" }]} onPress={() => router.back()}>
           <Text style={styles.secondaryBtnText}>Quay lại</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-
   const toggleCameraFacing = () => {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
+    setFacing((current) => (current === "back" ? "front" : "back"));
   };
 
   const takePicture = async () => {
@@ -183,7 +200,7 @@ export default function ScanPrescriptionScreen() {
       }
 
       const pickerResult = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: ["images"],
         allowsEditing: false,
         quality: 0.8,
       });
@@ -196,7 +213,6 @@ export default function ScanPrescriptionScreen() {
     }
   };
 
-
   const submitToOCR = async () => {
     if (!imageUri) return;
     setIsLoading(true);
@@ -206,23 +222,26 @@ export default function ScanPrescriptionScreen() {
 
       if (res.status === "success" && res.data.extracted) {
         const indicesMap = res.data.extracted.map((med: any) => parseFrequencyToIndices(med.frequency));
-        
+
         const parsedMeds = res.data.extracted.map((med: any, idx: number) => {
           const selectedIndices = indicesMap[idx];
           const customTimes = [...sessionTimesGlobal]; // tạo bản sao từ global
-          
+
           return {
             name: med.name,
             dosage: med.dosage || "",
             frequency: med.frequency || "",
             days: med.days || 1,
-            selectedSessions: [0, 1, 2, 3].map(i => selectedIndices.includes(i)),
+            selectedSessions: [0, 1, 2, 3].map((i) => selectedIndices.includes(i)),
             customTimes: customTimes,
           };
         });
         setEditedMeds(parsedMeds);
         setResult(res.data.extracted);
-        Alert.alert("Thành công", `Đã phân tích xong toa thuốc! (Độ tin cậy: ${Math.round(res.data.confidence * 100)}%)`);
+        Alert.alert(
+          "Thành công",
+          `Đã phân tích xong toa thuốc! (Độ tin cậy: ${Math.round(res.data.confidence * 100)}%)`
+        );
       } else {
         Alert.alert("Lỗi", "Không thể trích xuất dữ liệu, vui lòng thủ lại với ảnh rõ nét hơn.");
       }
@@ -244,8 +263,8 @@ export default function ScanPrescriptionScreen() {
       Alert.alert("Thiếu thông tin", "Vui lòng chọn thành viên gia đình để gán lịch thuốc.");
       return;
     }
-    
-    const formattedMeds = editedMeds.map(m => {
+
+    const formattedMeds = editedMeds.map((m) => {
       // Chỉ lấy các giờ của buổi được chọn
       const medTimes = m.customTimes.filter((_: any, idx: number) => m.selectedSessions[idx]);
       return {
@@ -253,14 +272,14 @@ export default function ScanPrescriptionScreen() {
         dosage: m.dosage,
         frequency: m.frequency,
         days: m.days,
-        times: medTimes
+        times: medTimes,
       };
     });
 
     const payload = {
       start_date: startDate.toISOString(),
       session_times: sessionTimesGlobal,
-      medications: formattedMeds
+      medications: formattedMeds,
     };
     createMutation.mutate(payload);
   };
@@ -277,7 +296,7 @@ export default function ScanPrescriptionScreen() {
   };
 
   const handleTimeConfirm = (date: Date) => {
-    const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const timeStr = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
     if (pickingTarget) {
       const { sessionIndex, medIndex } = pickingTarget;
       if (medIndex !== undefined) {
@@ -291,26 +310,22 @@ export default function ScanPrescriptionScreen() {
         const newGlobal = [...sessionTimesGlobal];
         newGlobal[sessionIndex] = timeStr;
         setSessionTimesGlobal(newGlobal);
-        
+
         // Hỏi user có muốn áp dụng giờ mới cho tất cả thuốc không
-        Alert.alert(
-            "Cập nhật giờ",
-            "Bạn có muốn áp dụng giờ này cho tất cả các loại thuốc đang chọn buổi này không?",
-            [
-              { text: "Không", style: "cancel" },
-              { 
-                text: "Đồng ý", 
-                onPress: () => {
-                   const updatedMeds = editedMeds.map(m => {
-                       const newCustom = [...m.customTimes];
-                       newCustom[sessionIndex] = timeStr;
-                       return { ...m, customTimes: newCustom };
-                   });
-                   setEditedMeds(updatedMeds);
-                } 
-              }
-            ]
-        );
+        Alert.alert("Cập nhật giờ", "Bạn có muốn áp dụng giờ này cho tất cả các loại thuốc đang chọn buổi này không?", [
+          { text: "Không", style: "cancel" },
+          {
+            text: "Đồng ý",
+            onPress: () => {
+              const updatedMeds = editedMeds.map((m) => {
+                const newCustom = [...m.customTimes];
+                newCustom[sessionIndex] = timeStr;
+                return { ...m, customTimes: newCustom };
+              });
+              setEditedMeds(updatedMeds);
+            },
+          },
+        ]);
       }
     }
     setTimePickerVisible(false);
@@ -333,16 +348,19 @@ export default function ScanPrescriptionScreen() {
         <View style={styles.formGroup}>
           <Text style={styles.label}>Gia đình</Text>
           <FullSizeDropdownComponent
-            data={families.map(f => ({ label: f.family_name, value: f.family_id }))}
+            data={families.map((f) => ({ label: f.family_name, value: f.family_id }))}
             defaultValue={familyId}
-            onChange={(i: any) => { setFamilyId(i.value); setMemberId(null); }}
+            onChange={(i: any) => {
+              setFamilyId(i.value);
+              setMemberId(null);
+            }}
           />
         </View>
 
         <View style={styles.formGroup}>
           <Text style={styles.label}>Thành viên</Text>
           <FullSizeDropdownComponent
-            data={members.map(m => ({ label: m.full_name || m.email || "Hồ sơ khách", value: m.member_id || m.id }))}
+            data={members.map((m) => ({ label: m.full_name || m.email || "Hồ sơ khách", value: m.member_id || m.id }))}
             defaultValue={memberId}
             placeholderText="Chọn thành viên"
             onChange={(i: any) => setMemberId(i.value)}
@@ -352,14 +370,17 @@ export default function ScanPrescriptionScreen() {
         <View style={styles.formGroup}>
           <Text style={styles.label}>Ngày bắt đầu uống liệu trình</Text>
           <TouchableOpacity style={styles.datePickerBtn} onPress={() => setShowDatePicker(true)}>
-            <Text>{startDate.toLocaleDateString('vi-VN')}</Text>
+            <Text>{startDate.toLocaleDateString("vi-VN")}</Text>
           </TouchableOpacity>
         </View>
 
         <DateTimePicker
           isVisible={showDatePicker}
           mode="date"
-          onConfirm={(date) => { setStartDate(date); setShowDatePicker(false); }}
+          onConfirm={(date) => {
+            setStartDate(date);
+            setShowDatePicker(false);
+          }}
           onCancel={() => setShowDatePicker(false)}
         />
 
@@ -371,69 +392,87 @@ export default function ScanPrescriptionScreen() {
         />
 
         <View style={styles.sessionSettings}>
-           <Text style={styles.label}>Cấu hình khung giờ chung (Sáng - Trưa - Chiều - Tối):</Text>
-           <View style={styles.sessionRow}>
-             {sessionTimesGlobal.map((time, idx) => (
-                <TouchableOpacity key={idx} style={styles.sessionTimeBtn} onPress={() => openTimePicker(idx)}>
-                    <Text style={styles.sessionLabel}>{SESSION_LABELS[idx]}</Text>
-                    <Text style={styles.sessionValue}>{time}</Text>
-                </TouchableOpacity>
-             ))}
-           </View>
+          <Text style={styles.label}>Cấu hình khung giờ chung (Sáng - Trưa - Chiều - Tối):</Text>
+          <View style={styles.sessionRow}>
+            {sessionTimesGlobal.map((time, idx) => (
+              <TouchableOpacity key={idx} style={styles.sessionTimeBtn} onPress={() => openTimePicker(idx)}>
+                <Text style={styles.sessionLabel}>{SESSION_LABELS[idx]}</Text>
+                <Text style={styles.sessionValue}>{time}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-        
-        <Text style={[styles.resultTitle, { fontSize: 18, alignSelf: "flex-start", marginBottom: 12 }]}>Danh sách thuốc & Buổi uống:</Text>
-        
+
+        <Text style={[styles.resultTitle, { fontSize: 18, alignSelf: "flex-start", marginBottom: 12 }]}>
+          Danh sách thuốc & Buổi uống:
+        </Text>
+
         {editedMeds.map((med, index) => (
           <View key={index} style={styles.medCard}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                 <Text style={styles.medName}>Thuốc #{index + 1}</Text>
-                 <TouchableOpacity onPress={() => {
-                     const newMeds = editedMeds.filter((_, i) => i !== index);
-                     setEditedMeds(newMeds);
-                     if (newMeds.length === 0) setResult(null);
-                 }}>
-                     <X color="#ef4444" size={20} />
-                 </TouchableOpacity>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}
+            >
+              <Text style={styles.medName}>Thuốc #{index + 1}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  const newMeds = editedMeds.filter((_, i) => i !== index);
+                  setEditedMeds(newMeds);
+                  if (newMeds.length === 0) setResult(null);
+                }}
+              >
+                <X color="#ef4444" size={20} />
+              </TouchableOpacity>
             </View>
 
             <Text style={styles.label}>Tên thuốc:</Text>
-            <TextInput style={styles.input} value={med.name} onChangeText={(t) => updateMed(index, 'name', t)} />
-            
-            <View style={{ flexDirection: 'row', gap: 10 }}>
+            <TextInput style={styles.input} value={med.name} onChangeText={(t) => updateMed(index, "name", t)} />
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.label}>Liều dùng:</Text>
-                <TextInput style={styles.input} value={med.dosage} onChangeText={(t) => updateMed(index, 'dosage', t)} />
+                <TextInput
+                  style={styles.input}
+                  value={med.dosage}
+                  onChangeText={(t) => updateMed(index, "dosage", t)}
+                />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.label}>Số ngày:</Text>
-                <TextInput style={styles.input} keyboardType="numeric" value={String(med.days)} onChangeText={(t) => updateMed(index, 'days', parseInt(t) || 1)} />
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={String(med.days)}
+                  onChangeText={(t) => updateMed(index, "days", parseInt(t) || 1)}
+                />
               </View>
             </View>
 
             <Text style={styles.label}>Buổi uống & Giờ nhắc (Bấm vào giờ để sửa):</Text>
             <View style={styles.sessionRow}>
-                {SESSION_LABELS.map((label, sIdx) => (
-                    <TouchableOpacity 
-                        key={sIdx} 
-                        style={[
-                            styles.sessionToggle, 
-                            med.selectedSessions[sIdx] && styles.sessionToggleActive
-                        ]}
-                        onPress={() => toggleSession(index, sIdx)}
-                    >
-                        <Text style={[styles.toggleLabel, med.selectedSessions[sIdx] && styles.toggleLabelActive]}>{label}</Text>
-                        {med.selectedSessions[sIdx] && (
-                            <TouchableOpacity onPress={() => openTimePicker(sIdx, index)}>
-                                <Text style={styles.toggleTime}>{med.customTimes[sIdx]}</Text>
-                            </TouchableOpacity>
-                        )}
+              {SESSION_LABELS.map((label, sIdx) => (
+                <TouchableOpacity
+                  key={sIdx}
+                  style={[styles.sessionToggle, med.selectedSessions[sIdx] && styles.sessionToggleActive]}
+                  onPress={() => toggleSession(index, sIdx)}
+                >
+                  <Text style={[styles.toggleLabel, med.selectedSessions[sIdx] && styles.toggleLabelActive]}>
+                    {label}
+                  </Text>
+                  {med.selectedSessions[sIdx] && (
+                    <TouchableOpacity onPress={() => openTimePicker(sIdx, index)}>
+                      <Text style={styles.toggleTime}>{med.customTimes[sIdx]}</Text>
                     </TouchableOpacity>
-                ))}
+                  )}
+                </TouchableOpacity>
+              ))}
             </View>
 
             <Text style={styles.label}>Ghi chú thêm:</Text>
-            <TextInput style={styles.input} value={med.frequency} onChangeText={(t) => updateMed(index, 'frequency', t)} />
+            <TextInput
+              style={styles.input}
+              value={med.frequency}
+              onChangeText={(t) => updateMed(index, "frequency", t)}
+            />
           </View>
         ))}
 
@@ -444,7 +483,7 @@ export default function ScanPrescriptionScreen() {
         >
           <Text style={styles.primaryBtnText}>{createMutation.isPending ? "Đang lưu..." : "Xác Nhận & Lưu DB"}</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={[styles.secondaryBtn, { marginTop: 12 }]} onPress={resetScanner}>
           <Text style={styles.secondaryBtnText}>Hủy & Quét Lại</Text>
         </TouchableOpacity>
@@ -464,11 +503,13 @@ export default function ScanPrescriptionScreen() {
             <Text style={styles.secondaryBtnText}>Chụp Lại</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.primaryBtn, isLoading && styles.disabledBtn]} onPress={submitToOCR} disabled={isLoading}>
+          <TouchableOpacity
+            style={[styles.primaryBtn, isLoading && styles.disabledBtn]}
+            onPress={submitToOCR}
+            disabled={isLoading}
+          >
             <Upload color="#FFF" size={20} />
-            <Text style={styles.primaryBtnText}>
-              {isLoading ? "Đang phân tích..." : "Phân Tích AI"}
-            </Text>
+            <Text style={styles.primaryBtnText}>{isLoading ? "Đang phân tích..." : "Phân Tích AI"}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -477,9 +518,7 @@ export default function ScanPrescriptionScreen() {
 
   return (
     <View style={styles.container}>
-      {isFocused && (
-        <CameraView style={StyleSheet.absoluteFill} facing={facing} ref={cameraRef} />
-      )}
+      {isFocused && <CameraView style={StyleSheet.absoluteFill} facing={facing} ref={cameraRef} />}
 
       <View style={[styles.cameraOverlay, StyleSheet.absoluteFill]}>
         <View style={styles.topControls}>
@@ -520,20 +559,20 @@ export default function ScanPrescriptionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
+    backgroundColor: "#000",
+    justifyContent: "center",
   },
   permissionContainer: {
     padding: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
     flex: 1,
   },
   permissionText: {
     fontSize: 16,
-    textAlign: 'center',
-    color: '#1F2F46',
+    textAlign: "center",
+    color: "#1F2F46",
     marginBottom: 24,
   },
   camera: {
@@ -541,48 +580,48 @@ const styles = StyleSheet.create({
   },
   cameraOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    justifyContent: 'space-between',
+    backgroundColor: "rgba(0,0,0,0.1)",
+    justifyContent: "space-between",
     paddingBottom: 40,
   },
   topControls: {
     paddingTop: 50,
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "flex-start",
   },
   closeBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   scanTarget: {
     flex: 1,
     marginHorizontal: 30,
     marginTop: 80,
     marginBottom: 40,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
   },
   scanInstruction: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: "rgba(0,0,0,0.6)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginTop: -80,
   },
   corner: {
-    position: 'absolute',
+    position: "absolute",
     width: 40,
     height: 40,
-    borderColor: '#2C5EDB',
+    borderColor: "#2C5EDB",
   },
   topLeft: {
     top: 0,
@@ -609,125 +648,125 @@ const styles = StyleSheet.create({
     borderRightWidth: 4,
   },
   bottomControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'flex-end',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "flex-end",
+    width: "100%",
     paddingHorizontal: 20,
     height: 120,
   },
   gallaryBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 10,
     gap: 4,
   },
   controlText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
   },
   captureBtn: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   captureBtnInner: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   previewImage: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   previewActions: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 24,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: "rgba(0,0,0,0.6)",
     gap: 16,
   },
   primaryBtn: {
     flex: 1,
-    backgroundColor: '#2C5EDB',
-    flexDirection: 'row',
+    backgroundColor: "#2C5EDB",
+    flexDirection: "row",
     height: 52,
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     gap: 8,
   },
   disabledBtn: {
-    backgroundColor: '#8a9ab4',
+    backgroundColor: "#8a9ab4",
   },
   primaryBtnText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   secondaryBtn: {
     flex: 1,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
+    backgroundColor: "#fff",
+    flexDirection: "row",
     height: 52,
     borderWidth: 1,
-    borderColor: '#2C5EDB',
+    borderColor: "#2C5EDB",
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     gap: 8,
   },
   secondaryBtnText: {
-    color: '#2C5EDB',
+    color: "#2C5EDB",
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   resultContainer: {
     padding: 24,
-    backgroundColor: '#F8FBFF',
+    backgroundColor: "#F8FBFF",
     flexGrow: 1,
   },
   resultHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
     marginTop: 40,
   },
   resultTitle: {
     fontSize: 22,
-    fontWeight: '700',
-    color: '#1A2A44',
+    fontWeight: "700",
+    color: "#1A2A44",
     marginTop: 12,
   },
   medCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E7EEF8',
+    borderColor: "#E7EEF8",
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 2 },
   },
   medName: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#1F2F46',
+    fontWeight: "700",
+    color: "#1F2F46",
     marginBottom: 8,
   },
   medDetail: {
     fontSize: 14,
-    color: '#4B5C74',
+    color: "#4B5C74",
     marginBottom: 4,
   },
   formGroup: {
@@ -735,87 +774,87 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#4B5C74',
+    fontWeight: "600",
+    color: "#4B5C74",
     marginBottom: 8,
     marginTop: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#D8E3F5',
+    borderColor: "#D8E3F5",
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#1F2F46',
+    color: "#1F2F46",
   },
   datePickerBtn: {
     padding: 14,
     borderWidth: 1,
-    borderColor: '#D8E3F5',
+    borderColor: "#D8E3F5",
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   sessionSettings: {
-    backgroundColor: '#EEF4FF',
+    backgroundColor: "#EEF4FF",
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
   },
   sessionRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
     marginTop: 8,
   },
   sessionTimeBtn: {
     flex: 1,
-    minWidth: '22%',
-    backgroundColor: '#fff',
+    minWidth: "22%",
+    backgroundColor: "#fff",
     padding: 8,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#D8E3F5',
+    borderColor: "#D8E3F5",
   },
   sessionLabel: {
     fontSize: 11,
-    color: '#4B5C74',
-    fontWeight: '600',
+    color: "#4B5C74",
+    fontWeight: "600",
   },
   sessionValue: {
     fontSize: 14,
-    color: '#2C5EDB',
-    fontWeight: '700',
+    color: "#2C5EDB",
+    fontWeight: "700",
     marginTop: 2,
   },
   sessionToggle: {
     flex: 1,
-    minWidth: '22%',
-    backgroundColor: '#F3F4F6',
+    minWidth: "22%",
+    backgroundColor: "#F3F4F6",
     padding: 8,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   sessionToggleActive: {
-    backgroundColor: '#2C5EDB',
-    borderColor: '#2C5EDB',
+    backgroundColor: "#2C5EDB",
+    borderColor: "#2C5EDB",
   },
   toggleLabel: {
     fontSize: 12,
-    color: '#4B5C74',
+    color: "#4B5C74",
   },
   toggleLabelActive: {
-    color: '#fff',
-    fontWeight: '700',
+    color: "#fff",
+    fontWeight: "700",
   },
   toggleTime: {
     fontSize: 11,
-    color: '#E0E7FF',
+    color: "#E0E7FF",
     marginTop: 2,
-    textDecorationLine: 'underline',
-  }
+    textDecorationLine: "underline",
+  },
 });

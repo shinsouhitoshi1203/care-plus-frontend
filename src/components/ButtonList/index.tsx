@@ -14,6 +14,7 @@ export type ButtonListProps = {
 };
 
 export default function ButtonList({ data }: ButtonListProps) {
+  if (!data || data.length === 0) return null;
   return (
     <>
       <View style={styles.listCard}>

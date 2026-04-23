@@ -14,6 +14,11 @@ type SubPageState = {
   title?: string;
 };
 
+type ModalState = {
+  isOpen: boolean;
+  content?: React.ReactNode;
+};
+
 type ZustandStoreProps = {
   version: string;
   loading: boolean;
@@ -21,6 +26,7 @@ type ZustandStoreProps = {
   behavior: {
     dialog: DialogState;
     subPage: SubPageState;
+    modal: ModalState;
   };
 };
 
@@ -29,6 +35,8 @@ type ZustandStoreMethods = {
   openDialog: (dialogData: Omit<DialogState, "isOpen">) => void;
   toggleDialog: () => void;
   setSubPageTitle: (title: string) => void;
+  openModal: (tag?: string) => void;
+  closeModal: () => void;
 };
 
 const useZustandStore = create<ZustandStoreProps & ZustandStoreMethods>()(
@@ -48,6 +56,10 @@ const useZustandStore = create<ZustandStoreProps & ZustandStoreMethods>()(
         },
         subPage: {
           title: "",
+        },
+        modal: {
+          isOpen: false,
+          content: "",
         },
       },
 
@@ -77,6 +89,21 @@ const useZustandStore = create<ZustandStoreProps & ZustandStoreMethods>()(
       setSubPageTitle(title: string) {
         set((state) => {
           state.behavior.subPage.title = title;
+        });
+      },
+
+      openModal(tag?: string) {
+        if (tag)
+          set((state) => {
+            state.behavior.modal.isOpen = true;
+            state.behavior.modal.content = tag;
+          });
+      },
+
+      closeModal() {
+        set((state) => {
+          state.behavior.modal.isOpen = false;
+          state.behavior.modal.content = "";
         });
       },
     }))

@@ -5,6 +5,7 @@ import TokenService from "@/features/auth/token";
 import FamilyAPI from "@/features/family/api";
 import { FamilyItem, FamilyMemberItem } from "@/features/family/types";
 import QuickLoginAPI from "@/features/quickLogin/api";
+import { SafeAreaContent } from "@/layouts/TabNavigator";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
@@ -472,6 +473,7 @@ function FamilyPage() {
             )}
           </View>
         ) : null}
+        <SafeAreaContent />
       </ScrollView>
 
       <Modal visible={actionModalVisible} transparent animationType="fade" onRequestClose={closeActionModal}>

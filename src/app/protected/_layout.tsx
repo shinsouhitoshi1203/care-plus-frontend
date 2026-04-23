@@ -6,16 +6,17 @@ import { Stack } from "expo-router";
 
 import { SOSAlertOverlay } from "@/components/SOS/SOSAlertOverlay";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import PlatformCheckLayout from "@/layouts/PlatformCheck";
 
 function ProtectedLayout() {
-  const { isAuthenticated, isPending } = useAuth();
+  const { isAuthenticated } = useAuth();
   const setLoading = useZustandStore((state) => state.setLoading);
 
   // Khởi tạo hệ thống thông báo đẩy khi đã đăng nhập
   usePushNotifications(isAuthenticated);
 
   return (
-    <>
+    <PlatformCheckLayout exclude="web">
       <Stack
         screenOptions={stackOptions}
         screenListeners={{
@@ -34,7 +35,7 @@ function ProtectedLayout() {
 
       {/* Lớp phủ cảnh báo khẩn cấp */}
       <SOSAlertOverlay />
-    </>
+    </PlatformCheckLayout>
   );
 }
 export default withWaitFallback(ProtectedLayout);

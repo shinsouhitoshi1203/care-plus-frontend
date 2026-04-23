@@ -1,9 +1,10 @@
 import ButtonList from "@/components/ButtonList";
 import useLogout from "@/features/user/hooks/useLogout";
 import useAuth from "@/hooks/useAuth";
+import { SafeAreaContent } from "@/layouts/TabNavigator";
 import { Avatar } from "@rneui/themed";
 import { useRouter } from "expo-router";
-import { BellRing, CircleHelp, Info, LogOutIcon, ShieldCheck, SmartphoneNfc } from "lucide-react-native";
+import { BellRing, CircleHelp, Info, LogOutIcon, ShieldCheck, Siren, SmartphoneNfc } from "lucide-react-native";
 import { useMemo } from "react";
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -21,6 +22,19 @@ function User() {
   const router = useRouter();
 
   const isQuickLogin = user?.loginType === "quick_login";
+
+  const OwnerControlList: UserControlItem[] = useMemo(() => {
+    if (user?.family[0]?.family_role !== "OWNER") return [];
+    return [
+      {
+        title: "Quản lý thông tin khẩn cấp",
+        id: "manage-emergency-info",
+        subtitle: "Cập nhật thông tin khẩn cấp của người thân",
+        icon: Siren,
+        onPress: () => router.push("/protected/userDetails/emergency/update"),
+      },
+    ];
+  }, [router, user]);
 
   const UserControlList: UserControlItem[] = useMemo(() => {
     return [
@@ -95,8 +109,12 @@ function User() {
         </View>
       </Pressable>
 
-      {/* Settings List */}
+      {/* Owner Control List */}
+      <ButtonList data={OwnerControlList} />
+
+      {/* User Control List */}
       <ButtonList data={UserControlList} />
+      <SafeAreaContent />
     </ScrollView>
   );
 }

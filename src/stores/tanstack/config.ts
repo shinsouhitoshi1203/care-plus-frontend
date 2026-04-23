@@ -1,4 +1,4 @@
-const TANSTACK_QUERY_CACHE_TIME_HR = 1; // 1 hour
+const TANSTACK_QUERY_CACHE_TIME_HR = 24 * 7; // 1 hour
 
 export const TANSTACK_QUERY_CACHE_TIME = TANSTACK_QUERY_CACHE_TIME_HR * 3600 * 1000; // in milliseconds
 

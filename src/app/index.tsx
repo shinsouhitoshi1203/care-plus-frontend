@@ -3,9 +3,11 @@ import AuthAPI from "@/features/auth/api";
 import TokenService from "@/features/auth/token";
 
 import QuickLoginAPI from "@/features/quickLogin/api";
+import { NotSupported } from "@/layouts/PlatformCheck";
 
 import { useQuery } from "@tanstack/react-query";
 import { Redirect } from "expo-router";
+import { Platform } from "react-native";
 function EntryPage() {
   const { data, isPending } = useQuery({
     queryKey: ["auth.check"],
@@ -54,6 +56,11 @@ function EntryPage() {
     },
     retry: false,
   });
+
+  if (!["ios", "android"].includes(Platform.OS)) {
+    // Chặn hoàn toàn các nền tảng không phải mobile (web, desktop)
+    return <NotSupported />;
+  }
 
   if (!isPending && !data?.isAuthenticated) {
     return <Redirect href="/(auth)/welcome" />;

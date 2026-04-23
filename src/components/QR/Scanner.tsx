@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, Pressable, Dimensions } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { X, Zap, ZapOff } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import { AppState, Dimensions, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 interface ScannerProps {
   onScan: (data: string) => void;
@@ -23,16 +23,28 @@ export default function Scanner({ onScan, onClose, title = "Quét mã QR" }: Sca
     }
   }, [permission]);
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
+        // This manually triggers a re-fetch of the permission state
+        requestPermission();
+      }
+    });
+
+    return () => subscription.remove();
+  }, [requestPermission]);
+
   if (!permission) {
     return <View style={styles.container} />;
   }
 
   if (!permission.granted) {
+    // Trường hợp người dùng bấm từ chối thì bắt mở Cài đặt, vì phía hệ thống sẽ không hiện lại prompt cấp quyền nữa
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.text}>Cần quyền truy cập máy ảnh để quét mã QR</Text>
-        <Pressable onPress={requestPermission} style={styles.button}>
-          <Text style={styles.buttonText}>Cấp quyền</Text>
+        <Pressable onPress={() => Linking.openSettings()} style={styles.button}>
+          <Text style={styles.buttonText}>Mở cài đặt ứng dụng</Text>
         </Pressable>
         <Pressable onPress={onClose} style={styles.closeButton}>
           <X color="#FFFFFF" size={24} />
