@@ -12,12 +12,12 @@ const styles = StyleSheet.create({
 export default function PublicQRComponent() {
   const { qrURL } = usePublicURL();
   const openModal = useZustandStore((state) => state.openModal);
-  const handlePress = () => {
+  const handlePress = (url: string) => {
     openModal("emergency-qr");
   };
   return (
     <>
-      <Pressable style={styles.qrContainer} onPress={handlePress} hitSlop={18}>
+      <Pressable style={styles.qrContainer} onPress={() => handlePress(qrURL || "")} hitSlop={18}>
         <QR url={qrURL} handlePress={handlePress} />
       </Pressable>
     </>

@@ -1,6 +1,8 @@
 import QR from "@/components/QR";
 import usePublicURL from "@/features/emergency/hooks/usePublicURL";
 import useZustandStore from "@/stores/zustand";
+import { Button } from "@rneui/themed";
+import { useRouter } from "expo-router";
 import { X } from "lucide-react-native";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -8,7 +10,7 @@ export default function BigEmergencyQRModal() {
   const isOpen = useZustandStore((state) => state.behavior.modal.isOpen);
   const content = useZustandStore((state) => state.behavior.modal.content);
   const closeModal = useZustandStore((state) => state.closeModal);
-
+  const router = useRouter();
   const { qrURL, id } = usePublicURL();
 
   if (!isOpen || content !== "emergency-qr") {
@@ -32,9 +34,19 @@ export default function BigEmergencyQRModal() {
             <QR size={220} url={qrURL} />
           </View>
 
-          <Text style={styles.subtitle}>ID: {id}</Text>
-
-          <Text style={styles.footerHint}>Nhấn ra ngoài để đóng</Text>
+          {id ? (
+            <Text style={styles.subtitle}>ID: {id}</Text>
+          ) : (
+            <Text style={styles.subtitle}>Không có mã QR nào để quét. Bạn cần thiết lập hồ sơ sức khỏe cá nhân.</Text>
+          )}
+          <Button
+            title="Trang khẩn cấp"
+            onPress={() => {
+              closeModal();
+              router.push("/protected/userDetails/emergency");
+            }}
+            containerStyle={{ borderRadius: 8, marginTop: 12, width: "100%" }}
+          />
         </View>
       </View>
     </Modal>

@@ -1,6 +1,16 @@
 import env from "@/config/env";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { type EmergencyInfo } from "../types";
+
+type EmergencyInfoApiError = Error & {
+  status?: number;
+};
+
+function createEmergencyInfoApiError(message: string, status?: number): EmergencyInfoApiError {
+  const error = new Error(message) as EmergencyInfoApiError;
+  error.status = status;
+  return error;
+}
 
 const publicApiClient = axios.create({
   baseURL: env.baseAPI,
@@ -16,12 +26,16 @@ export async function getPublicEmergencyInfo(publicId: string): Promise<Emergenc
     console.log("[API] getPublicEmergencyInfo response:", response.data);
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        throw new Error("Public ID đã hết hạn hoặc không tồn tại");
+    if (isAxiosError(error)) {
+      const status = error.response?.status;
+
+      if (status === 404) {
+        throw createEmergencyInfoApiError("Public ID đã hết hạn hoặc không tồn tại", status);
       }
-      throw new Error(error.response?.data?.message || "Không thể tải thông tin khẩn cấp");
+
+      throw createEmergencyInfoApiError(error.response?.data?.message || "Không thể tải thông tin khẩn cấp", status);
     }
+
     throw error;
   }
 }

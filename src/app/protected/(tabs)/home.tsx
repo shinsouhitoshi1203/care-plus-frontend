@@ -127,8 +127,8 @@ export default function HomePage() {
         </View>
       </View>
 
-      <View className="flex-1 flex" style={styles.quickActionContainer}>
-        <Text style={styles.quickActionTitle}>Truy cập nhanh</Text>
+      <View className="flex-1 flex">
+        <Text className="mb-5">Truy cập nhanh</Text>
         <View style={styles.quickActionList}>
           {quickActions.map(({ id, icon, ...action }) => {
             const IconComponent = icon ?? null;

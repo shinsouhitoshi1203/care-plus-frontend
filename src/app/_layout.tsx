@@ -1,13 +1,12 @@
 import LoadingWithZustand from "@/components/Loading";
-import tanstackClient from "@/stores/tanstack";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { TanstackProvider } from "@/stores/tanstack";
 import AuthProvider from "./_auth";
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={tanstackClient}>
+    <TanstackProvider fallback={<LoadingWithZustand />}>
       <LoadingWithZustand />
       <AuthProvider />
-    </QueryClientProvider>
+    </TanstackProvider>
   );
 }

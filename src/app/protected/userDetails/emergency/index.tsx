@@ -1,10 +1,11 @@
+import EmergencyDetails from "@/features/emergency/components/Details";
 import EmergencyNumbers from "@/features/emergency/layouts/EmergencyNumbers";
 import withWaitFallback from "@/hocs/withWaitFallback";
-import useSubPageTitle from "@/hooks/useSubPageTitle";
 import useZustandStore from "@/stores/zustand";
 import { Card } from "@rneui/themed";
-import { useNavigation } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import { AlertCircle, Droplets, Pill, QrCode, Stethoscope, UserRound, Users } from "lucide-react-native";
+import { useCallback } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 const EMERGENCY_PROFILE = [
@@ -52,42 +53,20 @@ const EMERGENCY_PROFILE = [
   },
 ] as const;
 
-const toneClassMap = {
-  rose: {
-    bg: "bg-rose-100",
-    icon: "#E11D48",
-    value: "text-rose-700",
-  },
-  sky: {
-    bg: "bg-sky-100",
-    icon: "#0369A1",
-    value: "text-sky-700",
-  },
-  amber: {
-    bg: "bg-amber-100",
-    icon: "#B45309",
-    value: "text-amber-700",
-  },
-  orange: {
-    bg: "bg-orange-100",
-    icon: "#C2410C",
-    value: "text-orange-700",
-  },
-  teal: {
-    bg: "bg-teal-100",
-    icon: "#0F766E",
-    value: "text-teal-700",
-  },
-  slate: {
-    bg: "bg-slate-200",
-    icon: "#334155",
-    value: "text-slate-700",
-  },
-} as const;
-
 function EmergencyDashboard() {
-  const navigator = useNavigation();
-  useSubPageTitle("Tổng quan khẩn cấp", navigator);
+  const setSubPageTitle = useZustandStore((state) => state.setSubPageTitle);
+  useFocusEffect(
+    useCallback(() => {
+      // Do something when the screen is focused (e.g., fetch data)
+      setSubPageTitle("Thông tin khẩn cấp");
+
+      return () => {
+        // Optional: Cleanup when the screen is unfocused or unmounted
+        setSubPageTitle("");
+      };
+    }, [setSubPageTitle])
+  );
+
   const openModal = useZustandStore((state) => state.openModal);
 
   return (
@@ -95,7 +74,6 @@ function EmergencyDashboard() {
       <Card containerStyle={{ margin: 0, borderRadius: 20, borderColor: "#FCA5A5", backgroundColor: "#FEF2F2" }}>
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-red-700 text-sm font-semibold">Khẩn cấp</Text>
             <Text className="text-slate-900 text-xl font-extrabold mt-1">Thông tin khẩn cấp</Text>
             <Text className="text-slate-600 mt-2 leading-5">
               Mở mã QR để nhân viên y tế hoặc người hỗ trợ quét nhanh thông tin quan trọng.
@@ -117,8 +95,8 @@ function EmergencyDashboard() {
       </Card>
 
       <EmergencyNumbers />
-
-      <Card containerStyle={{ margin: 0, borderRadius: 20, borderColor: "#E2E8F0" }}>
+      <EmergencyDetails />
+      {/* <Card containerStyle={{ margin: 0, borderRadius: 20, borderColor: "#E2E8F0" }}>
         <View className="flex-row items-center justify-between">
           <Text className="text-slate-900 text-lg font-bold">Thông tin sinh tồn khẩn cấp</Text>
         </View>
@@ -147,7 +125,7 @@ function EmergencyDashboard() {
             );
           })}
         </View>
-      </Card>
+      </Card> */}
     </ScrollView>
   );
 }
