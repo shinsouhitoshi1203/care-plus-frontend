@@ -126,16 +126,19 @@ export default function TagArrayField({
 
             <View className="mt-3 flex-row flex-wrap gap-2">
               {values.length > 0 ? (
-                values.map((item, index) => (
-                  <Pressable
-                    key={`${item}-${index}`}
-                    className="flex-row items-center gap-1 rounded-full border border-slate-300 bg-white px-3 py-1.5"
-                    onPress={() => removeTag(item)}
-                  >
-                    <Text className="text-xs font-semibold text-slate-700">{item}</Text>
-                    <X size={12} color="#475569" />
-                  </Pressable>
-                ))
+                <>
+                  <Text className="font-bold">Chọn: </Text>
+                  {values.map((item, index) => (
+                    <Pressable
+                      key={`${item}-${index}`}
+                      className="flex-row items-center gap-1 rounded-full border border-blue-300 bg-white px-3 py-1.5"
+                      onPress={() => removeTag(item)}
+                    >
+                      <Text className="text-xs font-semibold text-blue-700">{item}</Text>
+                      <X size={14} color="#00f" />
+                    </Pressable>
+                  ))}
+                </>
               ) : (
                 <Text className="text-xs italic text-slate-500">Chưa có dữ liệu</Text>
               )}

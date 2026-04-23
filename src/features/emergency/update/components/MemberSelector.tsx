@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, UserRound } from "lucide-react-native";
+import { ChevronDown, ChevronUp } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { type DropdownOption, type EmergencyMemberProfile } from "../types";
@@ -33,28 +33,6 @@ export default function MemberSelector({ options, value, onChange, activeMember 
           visible ? <ChevronUp size={18} color="#334155" /> : <ChevronDown size={18} color="#334155" />
         }
       />
-
-      {activeMember ? (
-        <View className="mt-3 flex-row items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-          <View
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 999,
-              backgroundColor: activeMember.highlight,
-            }}
-          />
-          <View className="flex-1">
-            <Text className="font-semibold text-slate-800">{activeMember.full_name}</Text>
-            <View className="mt-1 flex-row items-center gap-2">
-              <UserRound size={14} color="#64748B" />
-              <Text className="text-xs text-slate-500">
-                {activeMember.relation} • {activeMember.age} tuổi
-              </Text>
-            </View>
-          </View>
-        </View>
-      ) : null}
     </View>
   );
 }

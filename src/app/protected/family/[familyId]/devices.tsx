@@ -86,6 +86,9 @@ export default function DeviceManagementPage() {
       }
       needRestart.current = true;
       await queryClient.invalidateQueries({ queryKey: ["family-devices", familyId] });
+      // Sau khi setup thành công, xóa cache emergency info để các thiết bị khác (nếu có) sẽ refetch và cập nhật lại thông tin đăng nhập nhanh
+      queryClient.removeQueries({ queryKey: ["emergency_public_info"] });
+      queryClient.removeQueries({ queryKey: ["emergency_public_id"] });
     },
     onError: (error) => {
       const axiosError = error as AxiosError<{ message?: string }>;

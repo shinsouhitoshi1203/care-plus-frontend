@@ -7,30 +7,39 @@ import { getPublicEmergencyInfo } from "../api";
 
 export default function usePublicURL() {
   const queryClient = useQueryClient();
-  const { error, data, isError } = useQuery({
+  const {
+    error,
+    data: qr,
+    isError,
+    refetch,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["emergency_public_id"],
     queryFn: async () => {
       const url = (await apiClient.get("/users/emergency-info/qr")).data.data;
-      return url.quickAccessUrl;
+
+      console.log("Fetched public URL:", url.publicId);
+      return url.publicId;
     },
-    select: (url) => {
-      if (!url) return null;
-      // console.log("url", url);
-      const id = url.split("/").slice(-1)[0];
+    select: (id) => {
+      if (!id) return null;
       return {
-        id,
+        id: id,
         qrURL: `${env.baseWEB}/emergency/?id=${id}`,
       };
     },
+    retry: 3,
     staleTime: 15 * 60 * 1000, // 5 minutes
-    networkMode: "offlineFirst",
-    meta: { persist: true },
+    // networkMode: offlineFirst ? "offlineFirst" : "online",
+    // meta: { persist: offlineFirst },
   });
 
   useEffect(() => {
-    if (data?.id) {
+    if (qr?.id) {
+      // console.log("Prefetching emergency info for public ID:", data.id);
       // Fetch trước, để một hổi có gì thì đã có data rồi, không phải đợi load lại từ đầu
-      const emergencyPublicID = data.id;
+      const emergencyPublicID = qr.id;
 
       void queryClient.prefetchQuery({
         queryKey: ["emergency_public_info"],
@@ -39,11 +48,17 @@ export default function usePublicURL() {
         networkMode: "offlineFirst",
         meta: { persist: true },
       });
+    } else {
+      void refetch();
+      queryClient.removeQueries({ queryKey: ["emergency_public_id"] });
+      queryClient.removeQueries({ queryKey: ["emergency_public_info"] });
     }
-  }, [data?.id, queryClient]);
+  }, [qr, queryClient, refetch]);
 
   return {
-    ...data,
+    qr,
+    isLoading,
+    isFetching,
 
     isError,
     errorMessage: error?.message,

@@ -7,7 +7,6 @@ import styles from "./styles";
 
 export default function GreetingComponent() {
   const { data: fullName, isPending } = useAccount((user) => user.full_name);
-  console.log(fullName);
 
   return (
     <View style={styles.container}>

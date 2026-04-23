@@ -26,7 +26,7 @@ function useLogout() {
     onSettled: () => {
       setIsLoading(false);
 
-      resetAll();
+      void resetAll({ clearPersistence: true });
       // Navigate to login page or perform any other necessary actions after logout
       console.log("User logged out successfully");
       if (router.canDismiss()) router.dismissAll();

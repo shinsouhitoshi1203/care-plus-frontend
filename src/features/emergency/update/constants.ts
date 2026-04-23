@@ -21,7 +21,7 @@ export const EMERGENCY_SECTION_OPTIONS: DropdownOption<EmergencySectionKey>[] = 
   { label: "Nhóm máu", value: "blood_type" },
   { label: "Dị ứng", value: "allergies" },
   { label: "Bệnh mãn tính", value: "chronic_diseases" },
-  { label: "Thuốc đang sử dụng", value: "medications" },
+  { label: "Thuốc đang sử dụng", value: "current_medications" },
   { label: "Liên hệ khẩn cấp", value: "emergency_contacts" },
 ];
 
@@ -102,7 +102,7 @@ function inferSectionsFromDraft(draft: Omit<EmergencyFormValues, "sections">): E
   if (draft.blood_type.trim()) next.push("blood_type");
   if (draft.allergies.length > 0) next.push("allergies");
   if (draft.chronic_diseases.length > 0) next.push("chronic_diseases");
-  if (draft.current_medications.length > 0) next.push("medications");
+  if (draft.current_medications.length > 0) next.push("current_medications");
   if (draft.emergency_contacts.length > 0) next.push("emergency_contacts");
 
   if (next.length === 0) {

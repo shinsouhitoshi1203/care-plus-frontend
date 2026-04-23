@@ -25,9 +25,9 @@ function isNotFoundError(error: unknown): boolean {
 
 export default function useEmergencyInfo(manualPublicID?: string) {
   // If manualPublicID is provided, use it; otherwise, try to get it from the public ID query
-  const { id: publicIDFromQuery } = usePublicURL();
+  const { qr } = usePublicURL();
 
-  const publicID = manualPublicID || publicIDFromQuery;
+  const publicID = manualPublicID || qr?.id;
 
   const queryClient = useQueryClient();
 
@@ -49,20 +49,10 @@ export default function useEmergencyInfo(manualPublicID?: string) {
     if (Platform.OS === "web") return; // Only run cache cleanup on native platforms
 
     if (isNotFoundError(error)) {
-      queryClient.invalidateQueries({ queryKey: ["emergency_public_id"] });
-      queryClient.invalidateQueries({ queryKey: ["emergency_public_info"] });
+      // queryClient.removeQueries({ queryKey: ["emergency_public_id"] });
+      // queryClient.invalidateQueries({ queryKey: ["emergency_public_info"] });
     }
   }, [queryClient, error, publicID]);
-
-  useEffect(() => {
-    if (!manualPublicID) {
-      if (!publicIDFromQuery) {
-        console.warn("No public ID provided and none found in query parameters.");
-      } else {
-        console.log("Using public ID from query parameters:", publicIDFromQuery);
-      }
-    }
-  }, [manualPublicID, publicIDFromQuery]); // Just to silence React warning about missing dependencies
 
   return {
     error,

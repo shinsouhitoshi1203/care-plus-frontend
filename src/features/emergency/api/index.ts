@@ -1,3 +1,4 @@
+import apiClient from "@/config/axios";
 import env from "@/config/env";
 import axios, { isAxiosError } from "axios";
 import { type EmergencyInfo } from "../types";
@@ -37,6 +38,14 @@ export async function getPublicEmergencyInfo(publicId: string): Promise<Emergenc
     }
 
     throw error;
+  }
+}
+
+export async function upsertEmergencyInfo(values: Omit<EmergencyInfo, "full_name">): Promise<void> {
+  try {
+    await apiClient.put("/users/emergency-info", values);
+  } catch (error) {
+    console.log("[API] upsertEmergencyInfo error:", error);
   }
 }
 

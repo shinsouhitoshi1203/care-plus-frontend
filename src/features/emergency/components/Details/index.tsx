@@ -1,7 +1,9 @@
 import Tag from "@/components/tag";
 import { Card, Skeleton } from "@rneui/themed";
-import { ClockAlert } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { ClockAlert, RefreshCw } from "lucide-react-native";
+import { Pen } from "lucide-react-native/icons";
+import { Pressable, Text, View } from "react-native";
 import useEmergencyInfo from "../../hooks/useEmergencyInfo";
 import { EmergencyInfo } from "../../types";
 import { EMERGENCY_INFO_CRITERIA, EMERGENCY_STYLING, toneClassMap } from "./style";
@@ -16,20 +18,45 @@ function getEmergencyFieldValue(data: EmergencyInfo | undefined, field: string) 
   return null;
 }
 
-function NotFound() {
-  return (
-    <View className="flex-1 items-center justify-center">
-      <Text className="text-slate-500 text-sm">
-        Không tìm thấy thông tin khẩn cấp. Bạn hãy bổ sung thông tin này trong phần thông tin cá nhân.
-      </Text>
-    </View>
-  );
-}
-
 export default function EmergencyDetails() {
-  const { data, isPaused, isLoading } = useEmergencyInfo();
+  const { data, isPaused, isLoading, refetch } = useEmergencyInfo();
+  const router = useRouter();
+  if (!data && !isLoading)
+    return (
+      <View
+        className="flex-1 items-center justify-center"
+        style={{
+          padding: 16,
+          height: 220,
+          borderWidth: 1,
+          borderStyle: "dashed",
+          borderColor: "#CBD5E1",
+          borderRadius: 20,
+        }}
+      >
+        <Text className="text-slate-500 text-sm text-center">
+          Không tìm thấy thông tin khẩn cấp. Bạn hãy bổ sung thông tin này để kết xuất mã QR.
+        </Text>
 
-  if (!data && !isLoading) return <NotFound />;
+        <Pressable
+          className="mt-4 px-10 py-2 rounded-lg bg-teal-600"
+          onPress={() => {
+            router.push("/protected/userDetails/emergency/update");
+          }}
+        >
+          <Text className="text-white font-bold">Cập nhật thông tin</Text>
+        </Pressable>
+
+        <Pressable
+          className="mt-4 px-10 py-2 rounded-lg bg-teal-600"
+          onPress={() => {
+            void refetch();
+          }}
+        >
+          <RefreshCw size={20} color="#FFFFFF" />
+        </Pressable>
+      </View>
+    );
   return isLoading ? (
     <Skeleton animation="wave" width="100%" height={200} style={{ borderRadius: 20 }} />
   ) : (
@@ -38,6 +65,14 @@ export default function EmergencyDetails() {
         <View className="flex-row items-center justify-between">
           {isPaused && <ClockAlert size={20} color="#f00" />}
           <Text className="text-slate-900 text-lg font-bold">Thông tin sinh tồn khẩn cấp</Text>
+          <Pressable
+            className="w-10 h-10 rounded-lg bg-teal-600 flex items-center justify-center"
+            onPress={() => {
+              router.push("/protected/userDetails/emergency/update");
+            }}
+          >
+            <Pen size={24} color="#FFFFFF" />
+          </Pressable>
         </View>
 
         <View className="mt-4 gap-3">

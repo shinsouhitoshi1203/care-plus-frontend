@@ -39,7 +39,7 @@ const sectionVisualMap: Record<
     color: "#0284C7",
     bg: "#E0F2FE",
   },
-  medications: {
+  current_medications: {
     icon: Pill,
     color: "#0F766E",
     bg: "#CCFBF1",
@@ -67,14 +67,14 @@ export default function EmergencyUpdateForm() {
         render={({ field }) => (
           <View className="rounded-2xl border border-slate-200 bg-white p-4">
             <Text className="text-base font-semibold text-slate-900">Mục thông tin cần cập nhật</Text>
-            <Text className="mt-1 text-xs text-slate-500">
-              Chỉ chọn những phần bạn muốn chỉnh sửa để form gọn và tập trung hơn.
+            <Text className="mt-4 text-xs text-slate-500">
+              Chọn các mục thông tin khẩn cấp mà bạn muốn cung cấp. Bấm vào các thẻ màu bên dưới để bỏ.
             </Text>
-
             <MultiSelect
               style={styles.select}
               data={EMERGENCY_SECTION_OPTIONS}
               value={field.value}
+              mode="modal"
               labelField="label"
               valueField="value"
               placeholder="Chọn mục cần cập nhật"
@@ -89,12 +89,12 @@ export default function EmergencyUpdateForm() {
                 return (
                   <View className="flex-row items-center gap-3 px-2 py-2.5">
                     <View
-                      className="h-8 w-8 items-center justify-center rounded-lg"
+                      className="h-12 w-12 items-center justify-center rounded-lg"
                       style={{ backgroundColor: visual.bg }}
                     >
-                      <Icon size={16} color={visual.color} />
+                      <Icon size={24} color={visual.color} />
                     </View>
-                    <Text className="text-sm font-medium text-slate-800">{option.label}</Text>
+                    <Text className="text-lg font-medium text-slate-800">{option.label}</Text>
                   </View>
                 );
               }}
@@ -170,17 +170,13 @@ export default function EmergencyUpdateForm() {
 
       {selectedSections.includes("allergies") ? (
         <View>
-          <View className="mb-2 flex-row items-center gap-2 px-1">
-            <AlertCircle size={18} color="#B45309" />
-            <Text className="text-sm font-semibold text-amber-700">Dị ứng</Text>
-          </View>
           <TagArrayField
             control={control}
             name="allergies"
             label="Danh sách dị ứng"
             placeholder="Ví dụ: Penicillin"
             suggestions={ALLERGY_SUGGESTIONS}
-            hint="Nhấn vào chip để xóa mục đã nhập"
+            hint="Nhấn vào các thẻ màu để xóa mục đã nhập"
             accentColor="#D97706"
           />
         </View>
@@ -188,10 +184,6 @@ export default function EmergencyUpdateForm() {
 
       {selectedSections.includes("chronic_diseases") ? (
         <View>
-          <View className="mb-2 flex-row items-center gap-2 px-1">
-            <Stethoscope size={18} color="#0284C7" />
-            <Text className="text-sm font-semibold text-sky-700">Bệnh mãn tính</Text>
-          </View>
           <TagArrayField
             control={control}
             name="chronic_diseases"
@@ -204,19 +196,14 @@ export default function EmergencyUpdateForm() {
         </View>
       ) : null}
 
-      {selectedSections.includes("medications") ? (
+      {selectedSections.includes("current_medications") ? (
         <View>
-          <View className="mb-2 flex-row items-center gap-2 px-1">
-            <Pill size={18} color="#0F766E" />
-            <Text className="text-sm font-semibold text-teal-700">Thuốc đang sử dụng</Text>
-          </View>
           <TagArrayField
             control={control}
             name="current_medications"
-            label="Danh sách thuốc"
+            label="Danh sách thuốc đang dùng"
             placeholder="Ví dụ: Metformin"
             suggestions={MEDICATION_SUGGESTIONS}
-            hint="Có thể nhập tên hoạt chất hoặc tên thương mại"
             accentColor="#0F766E"
           />
         </View>
@@ -229,7 +216,7 @@ export default function EmergencyUpdateForm() {
 
 const styles = StyleSheet.create({
   select: {
-    marginTop: 12,
+    marginVertical: 12,
     minHeight: 52,
     borderRadius: 14,
     borderWidth: 1,
@@ -248,6 +235,6 @@ const styles = StyleSheet.create({
   },
   itemTextStyle: {
     color: "#0F172A",
-    fontSize: 15,
+    fontSize: 16,
   },
 });

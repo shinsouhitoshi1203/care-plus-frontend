@@ -11,11 +11,7 @@ export default function BigEmergencyQRModal() {
   const content = useZustandStore((state) => state.behavior.modal.content);
   const closeModal = useZustandStore((state) => state.closeModal);
   const router = useRouter();
-  const { qrURL, id } = usePublicURL();
-
-  if (!isOpen || content !== "emergency-qr") {
-    return null;
-  }
+  const { qr } = usePublicURL();
 
   return (
     <Modal animationType="fade" transparent={true} visible={isOpen} onRequestClose={closeModal}>
@@ -31,11 +27,11 @@ export default function BigEmergencyQRModal() {
           <Text style={styles.subtitle}>Đưa mã này cho người hỗ trợ để mở thông tin nhanh.</Text>
 
           <View style={styles.qrWrapper}>
-            <QR size={220} url={qrURL} />
+            <QR size={220} url={qr?.qrURL} />
           </View>
 
-          {id ? (
-            <Text style={styles.subtitle}>ID: {id}</Text>
+          {qr?.id ? (
+            <Text style={styles.subtitle}>ID: {qr.id}</Text>
           ) : (
             <Text style={styles.subtitle}>Không có mã QR nào để quét. Bạn cần thiết lập hồ sơ sức khỏe cá nhân.</Text>
           )}

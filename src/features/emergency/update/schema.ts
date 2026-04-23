@@ -14,14 +14,21 @@ const phonePattern = /^[0-9+\s.-]+$/;
 export const emergencyUpdateFormSchema = z
   .object({
     sections: z.array(sectionEnum).min(1, "Hãy chọn ít nhất 1 mục cần cập nhật"),
-    blood_type: z.string().trim(),
-    allergies: z.array(z.string().trim().min(1, "Nội dung không được để trống")),
-    chronic_diseases: z.array(z.string().trim().min(1, "Nội dung không được để trống")),
-    current_medications: z.array(z.string().trim().min(1, "Nội dung không được để trống")),
-    emergency_contacts: z.array(emergencyContactSchema),
+    blood_type: z.string().trim().optional(),
+    allergies: z.array(z.string().trim().min(1, "Nội dung không được để trống")).optional(),
+    chronic_diseases: z.array(z.string().trim().min(1, "Nội dung không được để trống")).optional(),
+    current_medications: z.array(z.string().trim().min(1, "Nội dung không được để trống")).optional(),
+    emergency_contacts: z.array(emergencyContactSchema).optional(),
   })
+  .strict()
   .superRefine((values, ctx) => {
-    if (values.sections.includes("blood_type") && !values.blood_type.trim()) {
+    const bloodType = values.blood_type?.trim() ?? "";
+    const allergies = values.allergies ?? [];
+    const chronicDiseases = values.chronic_diseases ?? [];
+    const currentMedications = values.current_medications ?? [];
+    const emergencyContacts = values.emergency_contacts ?? [];
+
+    if (values.sections.includes("blood_type") && !bloodType) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["blood_type"],
@@ -29,7 +36,7 @@ export const emergencyUpdateFormSchema = z
       });
     }
 
-    if (values.sections.includes("allergies") && values.allergies.length === 0) {
+    if (values.sections.includes("allergies") && allergies.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["allergies"],
@@ -37,7 +44,7 @@ export const emergencyUpdateFormSchema = z
       });
     }
 
-    if (values.sections.includes("chronic_diseases") && values.chronic_diseases.length === 0) {
+    if (values.sections.includes("chronic_diseases") && chronicDiseases.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["chronic_diseases"],
@@ -45,7 +52,7 @@ export const emergencyUpdateFormSchema = z
       });
     }
 
-    if (values.sections.includes("medications") && values.current_medications.length === 0) {
+    if (values.sections.includes("current_medications") && currentMedications.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["current_medications"],
@@ -54,7 +61,7 @@ export const emergencyUpdateFormSchema = z
     }
 
     if (values.sections.includes("emergency_contacts")) {
-      if (values.emergency_contacts.length === 0) {
+      if (emergencyContacts.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["emergency_contacts"],
@@ -62,8 +69,12 @@ export const emergencyUpdateFormSchema = z
         });
       }
 
-      values.emergency_contacts.forEach((contact, index) => {
-        if (!contact.name.trim()) {
+      emergencyContacts.forEach((contact, index) => {
+        const name = contact.name.trim();
+        const relationship = contact.relationship.trim();
+        const phone = contact.phone.trim();
+
+        if (!name) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["emergency_contacts", index, "name"],
@@ -71,7 +82,7 @@ export const emergencyUpdateFormSchema = z
           });
         }
 
-        if (!contact.relationship.trim()) {
+        if (!relationship) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["emergency_contacts", index, "relationship"],
@@ -79,7 +90,7 @@ export const emergencyUpdateFormSchema = z
           });
         }
 
-        if (!contact.phone.trim()) {
+        if (!phone) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["emergency_contacts", index, "phone"],
@@ -87,7 +98,7 @@ export const emergencyUpdateFormSchema = z
           });
         }
 
-        if (contact.phone.trim() && !phonePattern.test(contact.phone.trim())) {
+        if (phone && !phonePattern.test(phone)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["emergency_contacts", index, "phone"],

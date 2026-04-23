@@ -2,7 +2,7 @@ export const EMERGENCY_SECTION_KEYS = [
   "blood_type",
   "allergies",
   "chronic_diseases",
-  "medications",
+  "current_medications",
   "emergency_contacts",
 ] as const;
 

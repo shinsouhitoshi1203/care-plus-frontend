@@ -4,57 +4,13 @@ import withWaitFallback from "@/hocs/withWaitFallback";
 import useZustandStore from "@/stores/zustand";
 import { Card } from "@rneui/themed";
 import { useFocusEffect } from "expo-router";
-import { AlertCircle, Droplets, Pill, QrCode, Stethoscope, UserRound, Users } from "lucide-react-native";
+import { QrCode } from "lucide-react-native";
 import { useCallback } from "react";
 import { ScrollView, Text, View } from "react-native";
 
-const EMERGENCY_PROFILE = [
-  {
-    key: "blood-type",
-    title: "Nhóm máu",
-    value: "A+",
-    icon: Droplets,
-    tone: "rose",
-  },
-  {
-    key: "allergies",
-    title: "Tiền sử dị ứng",
-    value: "Penicillin, hải sản",
-    icon: AlertCircle,
-    tone: "amber",
-  },
-  {
-    key: "chronic-diseases",
-    title: "Tiền sử bệnh nền",
-    value: "Tăng huyết áp, đái tháo đường type 2",
-    icon: Stethoscope,
-    tone: "sky",
-  },
-  {
-    key: "medications",
-    title: "Nhóm thuốc đang dùng",
-    value: "Hạ áp, kháng đông",
-    icon: Pill,
-    tone: "teal",
-  },
-  {
-    key: "emergency-contacts",
-    title: "Liên hệ khẩn cấp",
-    value: "Nguyen Van B (Con trai) - 0901 234 567",
-    icon: Users,
-    tone: "orange",
-  },
-  {
-    key: "doctor-contact",
-    title: "Bác sĩ theo dõi",
-    value: "BS. Tran Minh C - 0912 345 678",
-    icon: UserRound,
-    tone: "slate",
-  },
-] as const;
-
 function EmergencyDashboard() {
   const setSubPageTitle = useZustandStore((state) => state.setSubPageTitle);
+
   useFocusEffect(
     useCallback(() => {
       // Do something when the screen is focused (e.g., fetch data)
@@ -94,38 +50,8 @@ function EmergencyDashboard() {
         </View>
       </Card>
 
-      <EmergencyNumbers />
       <EmergencyDetails />
-      {/* <Card containerStyle={{ margin: 0, borderRadius: 20, borderColor: "#E2E8F0" }}>
-        <View className="flex-row items-center justify-between">
-          <Text className="text-slate-900 text-lg font-bold">Thông tin sinh tồn khẩn cấp</Text>
-        </View>
-
-        <View className="mt-4 gap-3">
-          {EMERGENCY_PROFILE.map((item) => {
-            const tone = toneClassMap[item.tone];
-            const Icon = item.icon;
-
-            return (
-              <View key={item.key} className="rounded-2xl border border-slate-200 bg-white p-4">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-3">
-                    <View className={`h-10 w-10 rounded-xl items-center justify-center ${tone.bg}`}>
-                      <Icon size={18} color={tone.icon} />
-                    </View>
-                    <View>
-                      <Text className="text-slate-900 font-semibold">{item.title}</Text>
-                    </View>
-                  </View>
-                </View>
-                <View className="items-end">
-                  <Text className={`text-sm font-bold text-right ${tone.value}`}>{item.value}</Text>
-                </View>
-              </View>
-            );
-          })}
-        </View>
-      </Card> */}
+      <EmergencyNumbers />
     </ScrollView>
   );
 }

@@ -2,7 +2,7 @@ import secureStore from "@/stores/secureStore";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { ReactNode, createElement, useEffect, useState } from "react";
+import { createElement, ReactNode, useEffect, useState } from "react";
 import { createMMKV, type MMKV } from "react-native-mmkv";
 import { TANSTACK_QUERY_CACHE_TIME, TANSTACK_QUERY_CONFIG } from "./config";
 
@@ -73,6 +73,11 @@ export const initializeTanstackPersistence = async (): Promise<TanstackPersister
   return tanstackPersisterPromise;
 };
 
+export const removeTanstackPersistedCache = async (): Promise<void> => {
+  const persister = await initializeTanstackPersistence();
+  await persister.removeClient();
+};
+
 function getRestoredQueryDebugInfo() {
   const restoredQueries = tanstackClient.getQueryCache().getAll();
   return {
@@ -86,14 +91,25 @@ function getRestoredQueryDebugInfo() {
 type TanstackProviderProps = {
   children: ReactNode;
   fallback?: ReactNode;
+  persistToMMKV?: boolean;
 };
 
-export function TanstackProvider({ children, fallback = null }: TanstackProviderProps) {
+export function TanstackProvider({ children, fallback = null, persistToMMKV = true }: TanstackProviderProps) {
   const [persister, setPersister] = useState<TanstackPersister | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(!persistToMMKV);
 
   useEffect(() => {
     let isMounted = true;
+
+    if (!persistToMMKV) {
+      setPersister(null);
+      setIsReady(true);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setIsReady(false);
 
     void initializeTanstackPersistence()
       .then((resolvedPersister) => {
@@ -111,13 +127,13 @@ export function TanstackProvider({ children, fallback = null }: TanstackProvider
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [persistToMMKV]);
 
   if (!isReady) {
     return fallback;
   }
 
-  if (!persister) {
+  if (!persistToMMKV || !persister) {
     return createElement(QueryClientProvider, { client: tanstackClient }, children);
   }
 

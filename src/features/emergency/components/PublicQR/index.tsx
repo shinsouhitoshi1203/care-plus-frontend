@@ -10,15 +10,17 @@ const styles = StyleSheet.create({
   },
 });
 export default function PublicQRComponent() {
-  const { qrURL } = usePublicURL();
+  const { qr } = usePublicURL();
+
+  // console.log("Public QR URL:", qr);
   const openModal = useZustandStore((state) => state.openModal);
   const handlePress = (url: string) => {
     openModal("emergency-qr");
   };
   return (
     <>
-      <Pressable style={styles.qrContainer} onPress={() => handlePress(qrURL || "")} hitSlop={18}>
-        <QR url={qrURL} handlePress={handlePress} />
+      <Pressable style={styles.qrContainer} onPress={() => handlePress(qr?.qrURL || "")} hitSlop={18}>
+        <QR url={qr?.qrURL} handlePress={handlePress} />
       </Pressable>
     </>
   );
